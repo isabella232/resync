@@ -7,6 +7,10 @@ python:
 install:
   - pip install requests
   - pip install python-dateutil
+  - pip install coveralls
   - python setup.py install
-# command to run tests
-script: py.test
+script:
+  - py.test 
+  - coverage run --source=sbrew setup.py test
+after_success:
+  - coveralls
