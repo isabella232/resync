@@ -17,7 +17,9 @@ class TestDump(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Create tmp dir to write to and check
+        # Create tmp dir to write to and check 
+        if (cls._tmpdir is not None):
+            return
         cls._tmpdir=tempfile.mkdtemp()
         if (not os.path.isdir(cls._tmpdir)):
             raise Exception("Failed to create tempdir to use for dump tests")
@@ -25,14 +27,21 @@ class TestDump(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         # Cleanup
+        if (cls._tmpdir is None):
+            return
         if (not os.path.isdir(cls._tmpdir)):
             raise Exception("Ooops, no tempdir (%s) to clean up?" % (tmpdir))
         shutil.rmtree(cls._tmpdir)
+        cls._tmpdir = None
 
     @property
     def tmpdir(self):
         # read-only access to _tmpdir, just in case... The rmtree scares me
         return(self._tmpdir)
+
+    def test000_setup(self):
+        self.setUpClass() # kludge because 2.6 does do setUpClass
+        # see: https://docs.python.org/2/library/unittest.html
 
     def test00_dump_zip_resource_list(self):
         rl=ResourceDumpManifest()
@@ -177,6 +186,9 @@ class TestDump(unittest.TestCase):
         d=Dump(rl)
         self.assertTrue( d.check_files(check_length=False) )
         self.assertRaises( DumpError, d.check_files )
+
+    def test999_teardown(self):
+        self.tearDownClass() # kludge because 2.6 does do tearDownClass
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestDump)
