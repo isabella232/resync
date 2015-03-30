@@ -15,10 +15,10 @@ class Dump(object):
     which have the path attributes set to indicate the local
     location of the copies of the resources.
 
-       rl = ResourceList()
+       rl = ResourceList(resources=rl)
        # ... add items by whatever means, may have >50k items and/or
        # >100MB total size of files ...
-       d.write(resources=rl,basename="/tmp/rd_")
+       d.write(basename="/tmp/rd_")
        # will create dump files /tmp/rd_00001.zip etc.
     """
 
@@ -32,18 +32,19 @@ class Dump(object):
         self.path_prefix = None
         self.logger = logging.getLogger('resync.dump')
         
-    def write(self, basename=None, write_separate_manifests=True):
+    def write(self, basename=None, write_separate_manifests=False):
         """Write one or more dump files to complete this dump
 
         Returns the number of dump/archive files written.
         """
         self.check_files()
         n=0
+        dumpfile=''
         for manifest in self.partition_dumps():
-            dumpbase="%s%05d" % (basename,n)
-            dumpfile="%s.%s" % (dumpbase,self.format)
+            dumpfile=self.resources.part_name(basename,n,'.'+self.format)
             if (write_separate_manifests):
-                manifest.write(basename=dumpbase+'.xml')
+                manifest_file=self.resources.part_name(basename,n,'.xml')
+                manifest.write(manifest_file)
             if (self.format == 'zip'):
                 self.write_zip(manifest.resources,dumpfile)
             elif (self.format == 'warc'):
@@ -51,6 +52,11 @@ class Dump(object):
             else:
                 raise DumpError("Unknown dump format requested (%s)" % (self.format))
             n+=1
+        # If there was just one file, move it to basename instead of
+        # numbered file
+        if (n==1):
+            os.rename(dumpfile,basename)
+            self.logger.info("Single dump renamed to %s" % (basename))
         self.logger.info("Wrote %d dump files" % (n))
         return(n)
 
@@ -142,7 +148,7 @@ class Dump(object):
         return True
 
     def partition_dumps(self):
-        """Yeild a set of manifest object that parition the dumps
+        """Yeild a set of manifest objects that parition the dumps
 
         Simply adds resources/files to a manifest until their are either the
         the correct number of files or the size limit is exceeded, then yields

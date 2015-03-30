@@ -340,8 +340,8 @@ class ListBaseWithIndex(ListBase):
             next = None
         return(chunk,next)
 
-    def part_name(self, basename='/tmp/sitemap.xml', part_number=0):
-        """Name (file or URI) for one component sitemap
+    def part_name(self, basename='/tmp/sitemap.xml', part_number=0, suffix='.xml'):
+        """Name (file or URI) for one component sitemap/dump/etc.
         
         Works for both filenames and URIs because manipulates only the end
         of the string.
@@ -349,14 +349,13 @@ class ListBaseWithIndex(ListBase):
         Abstracting this into a function that starts from the basename to get
         prefix and suffix each time seems a bit wasteful but perhaps not worth
         worrying about. Allows same code to be used for the write() and 
-        as_xml_index() cases.
+        as_xml_index() cases. If part_number is not specified then assume 0, if
+        suffix is not specified then addumer
         """
-        # Work out how to name the sitemaps, attempt to add %05d before ".xml$", else append
-        sitemap_prefix = basename
-        sitemap_suffix = '.xml'
+        prefix = basename
         if (basename[-4:] == '.xml'):
-            sitemap_prefix = basename[:-4]
-        return( sitemap_prefix + ( "%05d" % (part_number) ) + sitemap_suffix )
+            prefix = basename[:-4]
+        return( prefix + ( "%05d" % (part_number) ) + suffix )
  
     def is_file_uri(self, uri):
         """Return true if uri looks like a local file URI, false otherwise
