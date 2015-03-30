@@ -86,10 +86,15 @@ class TestMapper(unittest.TestCase):
         self.assertFalse( Map('http://example.com/','http://example.com/').unsafe() )
         self.assertFalse( Map('a','b').unsafe() )
         self.assertFalse( Map('path/a','path/b').unsafe() )
+        self.assertFalse( Map('path/a','path/abc').unsafe() )
+        self.assertFalse( Map('path/abc','path/a').unsafe() )
         # The following are unsafe
         self.assertTrue( Map('path','path').unsafe() )
         self.assertTrue( Map('path/a','path').unsafe() )
         self.assertTrue( Map('path','path/b').unsafe() )
+        self.assertTrue( Map('/path/a/b/c/d','/path/a/b/c/d/e').unsafe() )
+        self.assertTrue( Map('/path/a/b/c/d','/path//a//b//c/d/e').unsafe() )
+        self.assertTrue( Map('/path/a/b/c/d','/path/a/y/z/../../b/c/d/e').unsafe() )
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestMapper)

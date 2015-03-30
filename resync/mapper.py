@@ -174,10 +174,15 @@ class Map:
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse( self.src_uri )
         if (scheme != ''):
             return(False)
-        s = os.path.normpath(self.src_uri)
-        d = os.path.normpath(self.dst_path)
-        lcp = os.path.commonprefix([s,d])
-        return(s == lcp or d == lcp)
+        # os.path.commonprefix cannot be used here because it matches
+        # on parts of path components. Instead split into components and
+        # compare them
+        s_segs = os.path.normpath(self.src_uri).split('/')
+        d_segs = os.path.normpath(self.dst_path).split('/')
+        for n in range(min(len(s_segs),len(d_segs))):
+            if (s_segs[n]!=d_segs[n]):
+                return(False)
+        return(True)
 
     def __repr__(self):
         return("Map( %s -> %s )" % (self.src_uri, self.dst_path))
