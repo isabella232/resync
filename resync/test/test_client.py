@@ -23,17 +23,19 @@ def capture_stdout():
 
 class TestClient(unittest.TestCase):
 
-    logstream = None
+    _logstream = None
 
     @classmethod
     def setUpClass(cls):
         # set up logging to class variable logstream
-        cls.logstream = StringIO.StringIO()
-        logging.basicConfig(level=logging.DEBUG, stream=cls.logstream)
+        cls._logstream = StringIO.StringIO()
+        logging.basicConfig(level=logging.DEBUG, stream=cls._logstream)
 
     def setUp(self):
         # clear logstream so we can readily check for new output in any test
-        self.logstream.truncate(0)
+        if (self._logstream is None):
+            self.setUpClass() #not run automatically in 2.6
+        self._logstream.truncate(0)
 
     def test01_make_resource_list_empty(self):
         c = Client()
@@ -69,7 +71,7 @@ class TestClient(unittest.TestCase):
     def test04_log_event(self):
         c = Client()
         c.log_event("xyz")
-        self.assertEqual( self.logstream.getvalue(), "DEBUG:resync.client:Event: 'xyz'\n" )
+        self.assertEqual( self._logstream.getvalue(), "DEBUG:resync.client:Event: 'xyz'\n" )
 
     def test05_baseline_or_audit(self):
         # Not setup...
