@@ -11,6 +11,9 @@ resync.library.cornell.edu_sim10000
 localhost_8888
 # Related to packaging
 resync.egg-info
+# Coverage
+.coverage
+htmlcov
 # Other...
 *.egg
 .DS_store
