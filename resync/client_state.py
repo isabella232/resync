@@ -18,8 +18,7 @@ import ConfigParser
 
 
 class ClientState(object):
-    """
-    """
+    """Class to read and write ResourceSync client state for incremental harvesting"""
 
     def __init__(self):
         self.status_file = '.resync-client-status.cfg'
