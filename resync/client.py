@@ -614,15 +614,15 @@ class Client(object):
         if (dump):
             if (outfile is None):
                 outfile = self.default_resource_dump
-            self.logger.info("Writing resource dump to %s..." % (dump))
-            d = Dump(format=self.dump_format)
-            d.write(resource_list=rl,dumpfile=outfile)
+            self.logger.info("Writing resource dump with basename %s..." % (outfile))
+            d = Dump(resources=rl,format=self.dump_format)
+            d.write(basename=outfile)
         else:
             if (outfile is None):
                 try:
                     print rl.as_xml()
                 except ListBaseIndexError as e:
-                    raise ClientFatalError("%s. Use --output option to specify base name for output files." % str(e))
+                    raise ClientFatalError("%s. Use --outfile option to specify base name for output files." % str(e))
             else:
                 rl.write(basename=outfile)
 
@@ -752,5 +752,3 @@ class Client(object):
              (status, same, words['created'], created, 
               words['updated'], updated, words['deleted'], deleted))
 
-if __name__ == '__main__':
-    main()

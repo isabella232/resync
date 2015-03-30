@@ -4,6 +4,7 @@ import logging
 import sys, StringIO, contextlib
 
 from resync.client import Client, ClientFatalError
+from resync.mapper import MapperError
 
 # From http://stackoverflow.com/questions/2654834/capturing-stdout-within-the-same-process-in-python
 class Data(object):
@@ -22,20 +23,76 @@ def capture_stdout():
 
 class TestClient(unittest.TestCase):
 
+    logstream = None
+
     @classmethod
     def setUpClass(cls):
-        logging.basicConfig(level=logging.INFO)
+        # set up logging to class variable logstream
+        cls.logstream = StringIO.StringIO()
+        logging.basicConfig(level=logging.DEBUG, stream=cls.logstream)
+
+    def setUp(self):
+        # clear logstream so we can readily check for new output in any test
+        self.logstream.truncate(0)
 
     def test01_make_resource_list_empty(self):
         c = Client()
         # No mapping is an error
         self.assertRaises( ClientFatalError, c.build_resource_list )
 
-    def test02_bad_source_uri(self):
+    def test02_source_uri(self):
+        c = Client()
+        # uris
+        self.assertEqual( c.sitemap_uri('http://example.org/path'), 'http://example.org/path')
+        self.assertEqual( c.sitemap_uri('info:whatever'), 'info:whatever')
+        self.assertEqual( c.sitemap_uri('http://example.org'), 'http://example.org')
+        # absolute local
+        self.assertEqual( c.sitemap_uri('/'), '/')
+        self.assertEqual( c.sitemap_uri('/path/anything'), '/path/anything')
+        self.assertEqual( c.sitemap_uri('/path'), '/path')
+        # relative, must have mapper
+        self.assertRaises( MapperError, c.sitemap_uri, 'a' )
+        c.set_mappings( ['http://ex.a/','/a'])
+        self.assertEqual( c.sitemap_uri('a'), 'http://ex.a/a')
+
+    def test03_build_resource_list(self):
+        c = Client()
+        c.set_mappings( ['http://ex.a/','resync/test/testdata/dir1'])
+        rl = c.build_resource_list(paths='resync/test/testdata/dir1')
+        self.assertEqual( len(rl), 2 )
+        # check max_sitemap_entries set in resulting resourcelist
+        c.max_sitemap_entries=9
+        rl = c.build_resource_list(paths='resync/test/testdata/dir1')
+        self.assertEqual( len(rl), 2 )
+        self.assertEqual( rl.max_sitemap_entries, 9 )
+
+    def test04_log_event(self):
+        c = Client()
+        c.log_event("xyz")
+        self.assertEqual( self.logstream.getvalue(), "DEBUG:resync.client:Event: 'xyz'\n" )
+
+    def test05_baseline_or_audit(self):
+        # Not setup...
         c = Client()
         self.assertRaises( ClientFatalError, c.baseline_or_audit )
         c.set_mappings( ['http://example.org/bbb','/tmp/this_does_not_exist'] )
         self.assertRaises( ClientFatalError, c.baseline_or_audit )
+        c.set_mappings( ['/tmp','/tmp']) #unsafe
+        self.assertRaises( ClientFatalError, c.baseline_or_audit )
+        # empty list to get no resources error
+        c = Client()
+        c.set_mappings( ['resync/test/testdata/empty_lists','resync/test/testdata/empty_lists'])
+        self.assertRaises( ClientFatalError, c.baseline_or_audit, audit_only=True )
+        # checksum will be set False if source list has no md5 sums
+        c = Client()
+        c.set_mappings( ['resync/test/testdata/dir1_src_in_sync','resync/test/testdata/dir1'])
+        c.checksum=True
+        c.baseline_or_audit(audit_only=True)
+        self.assertFalse( c.checksum )
+        # include resource in other domain (exception unless noauth set)
+        c = Client()
+        c.set_mappings( ['resync/test/testdata/dir1_src_with_ext','resync/test/testdata/dir1'])
+        self.assertRaises( ClientFatalError, c.baseline_or_audit, audit_only=False )
 
     def test06_write_capability_list(self):
         c = Client()
