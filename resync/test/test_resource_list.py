@@ -2,7 +2,7 @@ import unittest
 import StringIO
 import re
 from resync.resource import Resource
-from resync.resource_list import ResourceList, ResourceListDupeError
+from resync.resource_list import ResourceList, ResourceListOrdered, ResourceListDupeError
 from resync.sitemap import SitemapParseError
 
 class TestResourceList(unittest.TestCase):
@@ -42,7 +42,7 @@ class TestResourceList(unittest.TestCase):
     def test03_deleted(self):
         src = ResourceList()
         src.add( Resource('a',timestamp=1) )
-        src.add( Resource('b',timestamp=2) )
+        src.add( Resource('c',timestamp=3) )
         dst = ResourceList()
         dst.add( Resource('a',timestamp=1) )
         dst.add( Resource('b',timestamp=2) )
@@ -51,9 +51,9 @@ class TestResourceList(unittest.TestCase):
         ( same, changed, deleted, added ) = dst.compare(src)
         self.assertEqual( len(same), 2, "2 things unchanged" )
         self.assertEqual( len(changed), 0, "nothing changed" )
-        self.assertEqual( len(deleted), 2, "c and d deleted" )
+        self.assertEqual( len(deleted), 2, "b and d deleted" )
         i = iter(deleted)
-        self.assertEqual( i.next().uri, 'c', "first was c" )
+        self.assertEqual( i.next().uri, 'b', "first was b" )
         self.assertEqual( i.next().uri, 'd', "second was d" )
         self.assertEqual( len(added), 0, "nothing added" )
 
@@ -112,6 +112,10 @@ class TestResourceList(unittest.TestCase):
         self.assertFalse( i.has_md5() )
         r1.md5="aabbcc"
         self.assertTrue( i.has_md5() )
+        # no resources -> False
+        i = ResourceList()
+        i.resources = None
+        self.assertFalse( i.has_md5() )
 
     def test08_iter(self):
         i = ResourceList()
@@ -169,6 +173,22 @@ class TestResourceList(unittest.TestCase):
 </urlset>'
         rl=ResourceList()
         self.assertRaises( SitemapParseError, rl.parse, fh=StringIO.StringIO(xml) )
+
+    def test50_resource_list_ordered(self):
+        # test uris and add methods
+        rlo = ResourceListOrdered()
+        self.assertEqual( rlo.uris(), [] )
+        rlo.add( Resource('http://ex.a/') )
+        self.assertEqual( rlo.uris(), ['http://ex.a/'] )
+        rlo.add( Resource('http://ex.b/') )
+        self.assertEqual( rlo.uris(), ['http://ex.a/','http://ex.b/'] )
+        rlo.add( Resource('http://ex.b/'), replace=True )
+        self.assertEqual( rlo.uris(), ['http://ex.a/','http://ex.b/'] )
+        # replace=False is default, should raise error with dupe
+        self.assertRaises( ResourceListDupeError, rlo.add, 
+                           Resource('http://ex.b/') )
+        self.assertRaises( ResourceListDupeError, rlo.add, 
+                           Resource('http://ex.b/'), replace=False )
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestResourceList)

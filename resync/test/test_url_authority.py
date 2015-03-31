@@ -4,6 +4,16 @@ from resync.url_authority import UrlAuthority
 
 class TestUrlAuthority(unittest.TestCase):
 
+    def test00_init(self):
+        ua = UrlAuthority()
+        self.assertEqual( ua.master_scheme, 'none' )
+        self.assertEqual( ua.master_netloc, 'none.none.none' )
+        self.assertEqual( ua.master_path, '/not/very/likely' )
+        ua = UrlAuthority( 'http://example.org/a/sitemap.xml' )
+        self.assertEqual( ua.master_scheme, 'http' )
+        self.assertEqual( ua.master_netloc, 'example.org' )
+        self.assertEqual( ua.master_path, '/a' )
+
     def test01_strict_authority(self):
         # Default is server check only
         uauth = UrlAuthority( 'http://example.org/sitemap.xml', True )

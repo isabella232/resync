@@ -15,7 +15,16 @@ class TestCapabilityList(unittest.TestCase):
         self.assertEqual( len(caps), 1 )
         self.assertEqual( caps.as_xml(), '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/"><rs:md capability="capabilitylist" from="2013-02-07T22:39:00" /><url><loc>http://example.org/resourcelist.xml</loc><rs:md capability="resourcelist" /></url></urlset>' )
 
-    def test02_multiple(self):
+    def test02_add(self):
+        # low level add to resources in capability list
+        caps = CapabilityList()
+        caps.add( Resource( uri='http://e.x/rl', capability='resourcelist'))
+        # can be iterable with multiple resources
+        caps.add( [ Resource( uri='http://e.x/cl', capability='changelist'),
+                    Resource( uri='http://e.x/cd', capability='changedump') ] )
+        self.assertEqual( len(caps), 3 )
+
+    def test03_multiple(self):
         caps = CapabilityList()
         rl = ResourceList()
         caps.add_capability( rl, "rl.xml" )
@@ -26,7 +35,7 @@ class TestCapabilityList(unittest.TestCase):
         self.assertTrue( re.search( r'<loc>rl.xml</loc><rs:md capability="resourcelist" />', xml ) )
         self.assertTrue( re.search( r'<loc>cl.xml</loc><rs:md capability="changelist" />', xml) )
 
-    def test03_parse(self):
+    def test04_parse(self):
         xml='<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/"><rs:md capability="capabilitylist" from="2013-02-07T22:39:00" /><url><loc>http://example.org/resourcelist.xml</loc><rs:md capability="resourcelist" /></url></urlset>'
         cl=CapabilityList()
         cl.parse(str=xml)

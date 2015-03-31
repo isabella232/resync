@@ -1,14 +1,14 @@
 import unittest
 import StringIO
 import re
-from resync.resource import Resource
+from resync.resource import Resource, ChangeTypeError
 from resync.change_list import ChangeList
 from resync.resource_list import ResourceList
 from resync.sitemap import SitemapParseError
 
 class TestChangeList(unittest.TestCase):
 
-    def test1_set_with_repeats(self):
+    def test01_set_with_repeats(self):
         src = ChangeList()
         src.add( Resource('a',timestamp=1,change='updated') )
         src.add( Resource('b',timestamp=1,change='created') )
@@ -17,7 +17,7 @@ class TestChangeList(unittest.TestCase):
         src.add( Resource('b',timestamp=2,change='updated') )
         self.assertEqual(len(src), 5, "5 changes in change_list")
 
-    def test2_with_repeats_again(self):
+    def test02_with_repeats_again(self):
         r1 = Resource(uri='a',length=1,change='created')
         r2 = Resource(uri='b',length=2,change='created')
         i = ChangeList()
@@ -29,7 +29,14 @@ class TestChangeList(unittest.TestCase):
         i.add(r1d)
         self.assertEqual( len(i), 3 )
 
-    def test3_change_list(self):
+    def test03_add_if_changed(self):
+        src = ChangeList()
+        src.add_if_changed( Resource( uri='uri:a', change='deleted' ) )
+        self.assertEqual( len(src), 1 )
+        self.assertRaises( ChangeTypeError, src.add_if_changed,
+                           Resource( uri='uri:b' ) )
+
+    def test04_change_list(self):
         src = ChangeList()
         src.add( Resource('a',timestamp=1,change='created') )
         src.add( Resource('b',timestamp=2,change='created') )

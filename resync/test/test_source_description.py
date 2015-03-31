@@ -12,7 +12,16 @@ class TestSourceDescription(unittest.TestCase):
         rsd.md_at = None
         self.assertEqual( rsd.as_xml(), '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/"><rs:ln href="http://example.org/about" rel="describedby" /><rs:md capability="description" /></urlset>' )
 
-    def test02_one_caplist(self):
+    def test02_add(self):
+        # low level add to resources in source description
+        rsd = SourceDescription()
+        rsd.add( Resource( uri='http://e.x/1'))
+        # can be iterable with multiple resources
+        rsd.add( [ Resource( uri='http://e.x/2'),
+                   Resource( uri='http://e.x/3') ] )
+        self.assertEqual( len(rsd), 3 )
+
+    def test03_one_caplist(self):
         rsd = SourceDescription()
         rsd.describedby = "http://example.org/about"
         self.assertEqual( len(rsd), 0 )
@@ -21,7 +30,7 @@ class TestSourceDescription(unittest.TestCase):
         self.assertEqual( len(rsd), 1 )
         self.assertEqual( rsd.as_xml(), '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/"><rs:ln href="http://example.org/about" rel="describedby" /><rs:md capability="description" /><url><loc>http://example.org/ds1/cl.xml</loc><rs:md capability="capabilitylist" /></url></urlset>' )
 
-    def test03_a_bunch(self):
+    def test04_a_bunch(self):
         rsd = SourceDescription()
         rsd.describedby = "http://example.org/about"
         self.assertEqual( len(rsd), 0 )
@@ -31,7 +40,7 @@ class TestSourceDescription(unittest.TestCase):
         self.assertEqual( len(rsd), 3 )
         self.assertEqual( rsd.as_xml(), '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/"><rs:ln href="http://example.org/about" rel="describedby" /><rs:md capability="description" /><url><loc>http://example.org/ds1/cl.xml</loc><rs:md capability="capabilitylist" /></url><url><loc>http://example.org/ds2/cl.xml</loc><rs:md capability="capabilitylist" /></url><url><loc>http://example.org/ds3/cl.xml</loc><rs:md capability="capabilitylist" /></url></urlset>' )
 
-    def test04_parse(self):
+    def test05_parse(self):
         xml='<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/"><rs:ln href="http://example.org/about" rel="describedby" /><rs:md capability="description" /><url><loc>http://example.org/ds1/cl.xml</loc><rs:md capability="capabilitylist" /></url><url><loc>http://example.org/ds2/cl.xml</loc><rs:md capability="capabilitylist" /></url><url><loc>http://example.org/ds3/cl.xml</loc><rs:md capability="capabilitylist" /></url></urlset>'
         sd=SourceDescription()
         sd.parse(str=xml)

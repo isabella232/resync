@@ -21,6 +21,9 @@ class TestW3cDatetime(unittest.TestCase):
         self.assertEqual( datetime_to_str(60*60*24*365), "1971-01-01T00:00:00Z" )
         #
         self.assertEqual( datetime_to_str(1234567890), "2009-02-13T23:31:30Z" )
+        #
+        self.assertEqual( datetime_to_str(1234567890.1), "2009-02-13T23:31:30.100000Z" )
+        self.assertEqual( datetime_to_str(1234567890.1, no_fractions=True), "2009-02-13T23:31:30Z" )
 
     def test2_str_to_datetime(self):
         """Reading..."""
