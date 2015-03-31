@@ -22,22 +22,39 @@ def capture_stdout():
     sys.stdout = old
     data.result = capturer.getvalue()
 
+# From http://stackoverflow.com/questions/13379742/right-way-to-clean-up-a-temporary-folder-in-python-class
+@contextlib.contextmanager
+def temporary_directory(*args, **kwargs):
+    d = tempfile.mkdtemp(*args, **kwargs)
+    try:
+        yield d
+    finally:
+        shutil.rmtree(d)
 
 class TestClient(unittest.TestCase):
 
-    _logstream = None
-
-    @classmethod
-    def setUpClass(cls):
-        # set up logging to class variable logstream
-        cls._logstream = StringIO.StringIO()
-        logging.basicConfig(level=logging.DEBUG, stream=cls._logstream)
-
     def setUp(self):
-        # clear logstream so we can readily check for new output in any test
-        if (self._logstream is None):
-            self.setUpClass() #not run automatically in 2.6
+        # setup logstream so we can readily check for new output in any test
+        self._logstream = StringIO.StringIO()
+        self._handler = logging.StreamHandler(self._logstream)
+        self._log = logging.getLogger()
+        self._log.setLevel(logging.DEBUG)
+        for handler in self._log.handlers: 
+            self._log.removeHandler(handler)
+        self._log.addHandler(self._handler)
+
+    def clearLog(self):
         self._logstream.truncate(0)
+
+    def assertLogMatches(self, r):
+        if sys.version_info < (2, 7):
+            return self.assertTrue( re.search(r,self._logstream.getvalue()) )
+        else: #assume for 2.7, nicer debugging...
+            return self.assertRegexpMatches( self._logstream.getvalue(), r )
+
+    def tearDown(self):
+        self._log.removeHandler(self._handler)
+        self._handler.close()
 
     def test01_make_resource_list_empty(self):
         c = Client()
@@ -73,7 +90,7 @@ class TestClient(unittest.TestCase):
     def test04_log_event(self):
         c = Client()
         c.log_event("xyz")
-        self.assertEqual( self._logstream.getvalue(), "DEBUG:resync.client:Event: 'xyz'\n" )
+        self.assertLogMatches( "Event: 'xyz'" )
 
     def test05_baseline_or_audit_steps1to4(self):
         # Not setup...
@@ -100,15 +117,24 @@ class TestClient(unittest.TestCase):
 
     def test06_baseline_or_audit_step5(self):
         # use test data for src, make dir for destination
-        src = 'testdata/dir1_src_in_sync'
-        tmp_dst = tempfile.mkdtemp()
-        try:
+        src = 'testdata/client_src1'
+        with temporary_directory() as tmp_dst:
             c = Client()
             c.set_mappings( [src, tmp_dst] )
             c.baseline_or_audit()
-            self.assertTrue( re.search(r'Status:\s+NOT IN SYNC \(same=0, to create=2, to update=0, to delete=0\)', self._logstream.getvalue()) )
-        finally:
-            shutil.rmtree(tmp_dst)
+            self.assertLogMatches( r'Status:\s+NOT IN SYNC \(same=0, to create=3, to update=0, to delete=0\)' )
+            self.clearLog()
+            src = 'testdata/client_src2'
+            c.set_mappings( [src, tmp_dst] )
+            c.baseline_or_audit(allow_deletion=True)
+            self.assertLogMatches( r'Status:\s+SYNCED \(same=1, created=1, updated=1, deleted=1\)' )
+            # follow on with incremental
+            self.clearLog()
+            src = 'testdata/client_src3'
+            c.set_mappings( [src, tmp_dst] )
+            c.incremental(from_datetime="2015-01-01T01:01:01Z")
+            self.assertLogMatches( r'Read source change list, 1 changes listed' )
+            self.assertLogMatches( r'Status: CHANGES APPLIED \(created=1, updated=0, deleted=0\)' )
 
     def test07_write_capability_list(self):
         c = Client()

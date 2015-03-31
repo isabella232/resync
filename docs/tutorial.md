@@ -7,12 +7,12 @@ Writing a Resource Dump
 -----------------------
 
 Relative to the base directory of the github distribution there is a directory
-`resync/test/testdata/dir1` with two files, `file_a` and `file_b`. We can create 
+`testdata/dir1` with two files, `file_a` and `file_b`. We can create 
 a Resource Dump of this directory, as if it were mapped to `http://example.com/dir1`,
 with the following:
 
 ```
-simeon@RottenApple resync>resync --resourcedump --outfile /tmp/rd.zip http://example.com/dir1 resync/test/testdata/dir1
+simeon@RottenApple resync>resync --resourcedump --outfile /tmp/rd.zip http://example.com/dir1 testdata/dir1
 Total size of files to include in dump 65 bytes
 Wrote ZIP file dump /tmp/rd.zip with size 595 bytes
 
