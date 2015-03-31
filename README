@@ -33,6 +33,14 @@ Option details and a number of different modes are described with::
 
     resync -h
 
+A second client, `resync-explorer`, provides interactive text-based
+exploration of a ResourceSync source. Basic use is to specify a source
+(or a capability list, resource list, etc.) and then follow links shown
+(think `Hunt the Wumpus
+<http://en.wikipedia.org/wiki/Hunt_the_Wumpus>`_)::
+
+    resync-explorer http://resync.library.cornell.edu 
+
 Library usage
 -------------
 
@@ -104,7 +112,7 @@ Thanks to:
 Copyright and License
 ---------------------
 
-Copyright 2012--2014 Simeon Warner
+Copyright 2012--2015 Simeon Warner
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
