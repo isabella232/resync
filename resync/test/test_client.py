@@ -1,7 +1,9 @@
 import unittest
 import re
 import logging
+import shutil
 import sys, StringIO, contextlib
+import tempfile
 
 from resync.client import Client, ClientFatalError
 from resync.mapper import MapperError
@@ -59,12 +61,12 @@ class TestClient(unittest.TestCase):
 
     def test03_build_resource_list(self):
         c = Client()
-        c.set_mappings( ['http://ex.a/','resync/test/testdata/dir1'])
-        rl = c.build_resource_list(paths='resync/test/testdata/dir1')
+        c.set_mappings( ['http://ex.a/','testdata/dir1'])
+        rl = c.build_resource_list(paths='testdata/dir1')
         self.assertEqual( len(rl), 2 )
         # check max_sitemap_entries set in resulting resourcelist
         c.max_sitemap_entries=9
-        rl = c.build_resource_list(paths='resync/test/testdata/dir1')
+        rl = c.build_resource_list(paths='testdata/dir1')
         self.assertEqual( len(rl), 2 )
         self.assertEqual( rl.max_sitemap_entries, 9 )
 
@@ -73,7 +75,7 @@ class TestClient(unittest.TestCase):
         c.log_event("xyz")
         self.assertEqual( self._logstream.getvalue(), "DEBUG:resync.client:Event: 'xyz'\n" )
 
-    def test05_baseline_or_audit(self):
+    def test05_baseline_or_audit_steps1to4(self):
         # Not setup...
         c = Client()
         self.assertRaises( ClientFatalError, c.baseline_or_audit )
@@ -83,20 +85,32 @@ class TestClient(unittest.TestCase):
         self.assertRaises( ClientFatalError, c.baseline_or_audit )
         # empty list to get no resources error
         c = Client()
-        c.set_mappings( ['resync/test/testdata/empty_lists','resync/test/testdata/empty_lists'])
+        c.set_mappings( ['testdata/empty_lists','testdata/empty_lists'])
         self.assertRaises( ClientFatalError, c.baseline_or_audit, audit_only=True )
         # checksum will be set False if source list has no md5 sums
         c = Client()
-        c.set_mappings( ['resync/test/testdata/dir1_src_in_sync','resync/test/testdata/dir1'])
+        c.set_mappings( ['testdata/dir1_src_in_sync','testdata/dir1'])
         c.checksum=True
         c.baseline_or_audit(audit_only=True)
         self.assertFalse( c.checksum )
         # include resource in other domain (exception unless noauth set)
         c = Client()
-        c.set_mappings( ['resync/test/testdata/dir1_src_with_ext','resync/test/testdata/dir1'])
+        c.set_mappings( ['testdata/dir1_src_with_ext','testdata/dir1'])
         self.assertRaises( ClientFatalError, c.baseline_or_audit, audit_only=False )
 
-    def test06_write_capability_list(self):
+    def test06_baseline_or_audit_step5(self):
+        # use test data for src, make dir for destination
+        src = 'testdata/dir1_src_in_sync'
+        tmp_dst = tempfile.mkdtemp()
+        try:
+            c = Client()
+            c.set_mappings( [src, tmp_dst] )
+            c.baseline_or_audit()
+            self.assertTrue( re.search(r'Status:\s+NOT IN SYNC \(same=0, to create=2, to update=0, to delete=0\)', self._logstream.getvalue()) )
+        finally:
+            shutil.rmtree(tmp_dst)
+
+    def test07_write_capability_list(self):
         c = Client()
         with capture_stdout() as capturer:
             c.write_capability_list( { 'a':'uri_a', 'b':'uri_b' } )
@@ -105,7 +119,7 @@ class TestClient(unittest.TestCase):
         self.assertTrue( re.search(r'<url><loc>uri_a</loc><rs:md capability="a"',capturer.result) )
         self.assertTrue( re.search(r'<url><loc>uri_b</loc><rs:md capability="b"',capturer.result) )
 
-    def test07_write_source_description(self):
+    def test08_write_source_description(self):
         c = Client()
         with capture_stdout() as capturer:
             c.write_source_description( [ 'a','b','c' ] )
@@ -120,25 +134,25 @@ class TestClient(unittest.TestCase):
         # document and identifies its type
         c = Client()
         with capture_stdout() as capturer:
-            c.sitemap_name='resync/test/testdata/examples_from_spec/resourcesync_ex_1.xml'
+            c.sitemap_name='testdata/examples_from_spec/resourcesync_ex_1.xml'
             c.parse_document()
         self.assertTrue( re.search(r'Parsed resourcelist document with 2 entries',capturer.result) )
         with capture_stdout() as capturer:
-            c.sitemap_name='resync/test/testdata/examples_from_spec/resourcesync_ex_17.xml'
+            c.sitemap_name='testdata/examples_from_spec/resourcesync_ex_17.xml'
             c.parse_document()
         self.assertTrue( re.search(r'Parsed resourcedump document with 3 entries',capturer.result) )
         with capture_stdout() as capturer:
-            c.sitemap_name='resync/test/testdata/examples_from_spec/resourcesync_ex_19.xml'
+            c.sitemap_name='testdata/examples_from_spec/resourcesync_ex_19.xml'
             c.parse_document()
         self.assertTrue( re.search(r'Parsed changelist document with 4 entries',capturer.result) )
         with capture_stdout() as capturer:
-            c.sitemap_name='resync/test/testdata/examples_from_spec/resourcesync_ex_22.xml'
+            c.sitemap_name='testdata/examples_from_spec/resourcesync_ex_22.xml'
             c.parse_document()
         self.assertTrue( re.search(r'Parsed changedump document with 3 entries',capturer.result) )
 
     def test40_write_resource_list_mappings(self):
         c = Client()
-        c.set_mappings( ['http://example.org/','resync/test/testdata/'] )
+        c.set_mappings( ['http://example.org/','testdata/'] )
         # with no explicit paths seting the mapping will be used
         with capture_stdout() as capturer:
             c.write_resource_list()
@@ -150,10 +164,10 @@ class TestClient(unittest.TestCase):
 
     def test41_write_resource_list_path(self):
         c = Client()
-        c.set_mappings( ['http://example.org/','resync/test/testdata/'] )
+        c.set_mappings( ['http://example.org/','testdata/'] )
         # with an explicit paths setting only the specified paths will be included
         with capture_stdout() as capturer:
-            c.write_resource_list(paths='resync/test/testdata/dir1')
+            c.write_resource_list(paths='testdata/dir1')
         sys.stderr.write(capturer.result)
         self.assertTrue( re.search(r'<rs:md at="\S+" capability="resourcelist"', capturer.result ) )
         self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_a</loc>', capturer.result ) )

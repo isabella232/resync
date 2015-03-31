@@ -369,9 +369,10 @@ class Client(object):
                     self.last_timestamp = resource.timestamp
             self.log_event(Resource(resource=resource, change=change))
             # 3. sanity check
-            length = os.stat(file).st_size
-            if (resource.length != length):
-                self.logger.info("Downloaded size for %s of %d bytes does not match expected %d bytes" % (resource.uri,length,resource.length))
+            if (resource.length is not None):
+                length = os.stat(file).st_size
+                if (resource.length != length):
+                    self.logger.info("Downloaded size for %s of %d bytes does not match expected %d bytes" % (resource.uri,length,resource.length))
             if (self.checksum and resource.md5 is not None):
                 file_md5 = compute_md5_for_file(file)
                 if (resource.md5 != file_md5):
