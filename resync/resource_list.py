@@ -186,7 +186,7 @@ class ResourceList(ListBaseWithIndex):
                 created.add(src_cur)
                 src_cur=next(src_iter,None)
             else:
-                raise Exception("this should not be possible")
+                raise Exception("Impossible case in compare!") # pragma: no cover
         # what do we have leftover in src or dst lists?
         while (dst_cur is not None):
             deleted.add(dst_cur)
