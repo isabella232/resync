@@ -47,6 +47,29 @@ class TestResource(unittest.TestCase):
         r2.lastmod='2012-01-02T01:02:03.99Z'
         self.assertNotEqual( r1.timestamp, r2.timestamp )
         self.assertEqual( r1, r2 )
+        
+    def test01e_same(self):
+        """Same md5, wildly different timestamp"""
+        r1 = Resource('a')
+        r1.lastmod='2014-08-22T01:02:03Z'
+        r1.md5='abcd'
+        r2 = Resource('a')
+        r2.lastmod='2012-01-02T01:02:03.99Z'
+        r2.md5='abcd'
+        self.assertNotEqual( r1.timestamp, r2.timestamp )
+        self.assertEqual(r1.md5, r2.md5)
+        self.assertEqual(r1, r2)
+
+    def test01f_same(self):
+        """Same, One md5, slightly different timestamp"""
+        r1 = Resource('a')
+        r1.lastmod='2012-01-02T01:02:03Z'
+        r2 = Resource('a')
+        r2.lastmod='2012-01-02T01:02:03.99Z'
+        r2.md5='abcd'
+        self.assertNotEqual( r1.timestamp, r2.timestamp )
+        self.assertNotEqual(r1.md5, r2.md5)
+        self.assertEqual(r1, r2)
 
     def test02a_diff(self):
         r1 = Resource('a')
@@ -57,6 +80,15 @@ class TestResource(unittest.TestCase):
         r1 = Resource('a',lastmod='2012-01-11')
         r2 = Resource('a',lastmod='2012-01-22')
         #print 'r1 == r2 : '+str(r1==r2)
+        self.assertNotEqual( r1, r2 )
+
+    def test02c_diff(self):
+        """diff because of different MD5"""
+        r1 = Resource('a')
+        r1.md5='abcd'
+        r2 = Resource('a')
+        r2.md5='efgh'
+        self.assertNotEqual(r1.md5, r2.md5)
         self.assertNotEqual( r1, r2 )
 
     def test04_bad_lastmod(self):

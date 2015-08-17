@@ -404,23 +404,30 @@ class Resource(object):
         
         Equality means:
         1. same uri, AND
-        2. same timestamp WITHIN delta if specified for either, AND
-        3. same md5 if specified for both, AND
+        2. same md5 if specified for both, 
+        
+        OR
+        
+        1. same uri, AND
+        2. md5 not specified for both, AND
+        3. same timestamp WITHIN delta if specified for either, AND
         4. same length if specified for both
         """
         if (other is None): return False
         
         if (self.uri != other.uri):
             return(False)
+        if ( self.md5 is not None and other.md5 is not None ):
+            if ( self.md5 == other.md5 ):
+                return(True)
+            else:
+                return(False)
         if ( self.timestamp is not None or other.timestamp is not None ):
             # not equal if only one timestamp specified
             if ( self.timestamp is None or 
                  other.timestamp is None or
                  abs(self.timestamp-other.timestamp)>=delta ):
                 return(False)
-        if ( ( self.md5 is not None and other.md5 is not None ) and
-             self.md5 != other.md5 ):
-            return(False)
         if ( ( self.length is not None and other.length is not None ) and
              self.length != other.length ):
             return(False)
@@ -429,7 +436,7 @@ class Resource(object):
     def __str__(self):
         """Return a human readable string for this resource
 
-        Includes only the parts necessary for synchronizaion and
+        Includes only the parts necessary for synchronization and
         designed to support logging.
         """
         s = [ str(self.uri), str(self.lastmod), str(self.length),
