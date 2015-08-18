@@ -102,7 +102,7 @@ class ResourceList(ListBaseWithIndex):
 
     This same class is used for both the source and the destination
     and is the central point of comparison the decide whether they
-    are in sync or what needs to be copied to bring the destinaton
+    are in sync or what needs to be copied to bring the destination
     into sync.
 
     A Resource List will admit only one resource with any given URI.

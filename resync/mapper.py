@@ -26,13 +26,13 @@ class Mapper():
         Accepts two distinct formats:
         1. If there are exactly two entries then these may be the source base URI
         and the destination base path. Neither may contain an equals (=) sign.
-        2. For any number of mapping stings interpret each as a mapping URI=path. 
+        2. For any number of mapping strings interpret each as a mapping URI=path. 
         These are in the order they will be tried.
         
         And if use_default_path is True then a third:
         3. If there is exactly one entry and it does not contain an equals (=)
         sign then a safe local path is created based on the source base URI. In
-        the case that the source base URI is a local path already then an indentity 
+        the case that the source base URI is a local path already then an identity 
         mapping is used.
         """
         if (use_default_path and

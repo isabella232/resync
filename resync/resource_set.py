@@ -1,7 +1,7 @@
 """A set of Resource objects used for Capability List
 Indexes and ResourceSync Description documents.
 
-Ordinging is currently alphanumeric (using sorted(..)) on the
+Ordering is currently alphanumeric (using sorted(..)) on the
 uri which is the key. 
 """
 
