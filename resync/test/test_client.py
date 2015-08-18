@@ -105,6 +105,13 @@ class TestClient(unittest.TestCase):
         #self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_a</loc><lastmod>[\w\-:]+</lastmod><rs:md length="20" /></url>', capturer.result ) )
         #self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_b</loc><lastmod>[\w\-:]+</lastmod><rs:md length="45" /></url>', capturer.result ) )
 
+    def test50_update_resource_list(self):
+        c=Client()
+        c.set_mappings( ['http://example.org/','resync/test/testdata/'] )
+        with capture_stdout() as capturer:
+            c.update_resource_list(paths='resync/test/testdata/dir1', ref_sitemap='resync/test/testdata/examples_from_spec/resourcesync_ex_34.xml')
+        sys.stderr.write('----------\n')
+        sys.stderr.write(capturer.result)
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClient)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -442,7 +442,7 @@ class Client(object):
                     break
 
     def explore(self):
-        """Explore capabilities of a server interactvely
+        """Explore capabilities of a source interactively
         
         Will use sitemap URI taken either from explicit self.sitemap_name
         or derived from the mappings supplied.
@@ -572,7 +572,7 @@ class Client(object):
         return(options,capability)
 
     def explore_show_head(self,uri,check_headers=None):
-        """Do HEAD on uri and show infomation
+        """Do HEAD on uri and show information
 
         Will also check headers against any values specified in 
         check_headers.
@@ -592,9 +592,26 @@ class Client(object):
                     if (response.headers[header] == check_headers[header]):
                         check_str=' MATCHES EXPECTED VALUE'
                     else:
-                        check_STR=' EXPECTED %s' % (check_headers[header])
+                        check_str=' EXPECTED %s' % (check_headers[header])
                 print "  %s: %s%s" % (header, response.headers[header], check_str)
 
+    def update_resource_list(self, paths=None, outfile=None, ref_sitemap=None, links=None):
+        """Build a Resource List for files on local disk. 
+        The combined set of the referenced ResourceList and the local files.
+        """
+        # 1. Get and parse reference sitemap
+        old_rl = self.read_reference_resource_list(ref_sitemap)
+        # 2. Build a new Resource List from the files on local disk
+        new_rl = self.build_resource_list(paths=paths,set_path=None)
+        print 'new_rl: '+new_rl.as_xml()
+        # 3. Calculate change list
+        (same,updated,deleted,created)=old_rl.compare(new_rl) 
+        old_rl.add(updated, True)
+        old_rl.add(created, False)
+        print '--------\n'
+        print 'old_rl: '+old_rl.as_xml()
+        print "  %s done" % (ref_sitemap)
+        
     def write_resource_list(self,paths=None,outfile=None,links=None,dump=None):
         """Write a Resource List or a Resource Dump for files on local disk
 
