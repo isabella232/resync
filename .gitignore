@@ -13,6 +13,8 @@ localhost_8888
 resync.egg-info
 # Other...
 .DS_store
+.project
+.pydevproject
 *.pyc
 *~
 rc
