@@ -109,9 +109,17 @@ class TestClient(unittest.TestCase):
         c=Client()
         c.set_mappings( ['http://example.org/','resync/test/testdata/'] )
         with capture_stdout() as capturer:
-            c.update_resource_list(paths='resync/test/testdata/dir1', ref_sitemap='resync/test/testdata/examples_from_spec/resourcesync_ex_34.xml')
+            c.calculate_changelist(paths='resync/test/testdata/dir1', 
+                                   resource_sitemap='resync/test/testdata/examples_from_spec/resourcesync_ex_34.xml', 
+                                   changelist_sitemap='resync/test/testdata/examples_from_spec/resourcesync_cl_01.xml')
         sys.stderr.write('----------\n')
         sys.stderr.write(capturer.result)
+        self.assertTrue( re.search(r'<rs:md capability="changelist"', capturer.result ) )
+        self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_a</loc>', capturer.result ) )
+        self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_b</loc>', capturer.result ) )
+        self.assertTrue( re.search(r'<url><loc>http://example.com/res1.html</loc>', capturer.result ) )
+        self.assertTrue( re.search(r'<url><loc>http://example.com/res2.pdf</loc>', capturer.result ) )
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClient)
     unittest.TextTestRunner(verbosity=2).run(suite)

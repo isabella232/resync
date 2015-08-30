@@ -53,6 +53,11 @@ class ResourceListDict(dict):
     def uris(self):
         return(sorted(self.keys()))
 
+    def remove(self, resource):
+        uri = resource.uri
+        if (uri in self):
+            self[uri]=None
+        
     def add(self, resource, replace=False):
         """Add just a single resource"""
         uri = resource.uri
@@ -80,7 +85,7 @@ class ResourceListOrdered(list):
         for r in self:
             uris.append(r.uri)
         return(uris)
-
+       
     def add(self, resource, replace=False):
         """Add a single resource, check for dupes"""
         uri = resource.uri
@@ -139,6 +144,9 @@ class ResourceList(ListBaseWithIndex):
                                            allow_multifile=allow_multifile, mapper=mapper,
                                            resources_class=resources_class)
 
+    def remove(self, resource):
+        self.resources.remove(resource)
+    
     def add(self, resource, replace=False):
         """Add a resource or an iterable collection of resources
 

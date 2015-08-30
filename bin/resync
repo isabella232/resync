@@ -62,9 +62,10 @@ def main():
                         "based either on explicit --paths setting, else starting from all local "
                         "paths specified in the mappings. Writes to STDOUT by default, override "
                         "with --outfile")
-    loc.add_option('--newresourcelist', '--new-resource-list', action='store_true',
+    loc.add_option('--calculatechangelist', '--new-resource-list', action='store_true',
                    help="write a resource list based on new/updated files on disk using uri=path mappings "
-                        "in reverse. Scans local disk and combines with --reference to create set "
+                        "in reverse. Scans local disk and combines with --reference (the resourcelist) and " 
+                        "--newreference (the changelist) to create a new changelist "
                         "based either on explicit --paths setting, else starting from all local "
                         "paths specified in the mappings. Writes to STDOUT by default, override "
                         "with --outfile")
@@ -180,7 +181,7 @@ def main():
     if (not args.baseline and not args.incremental and not args.audit and 
         not args.parse and not args.explore and
         not args.resourcelist and not args.changelist and
-        not args.newresourcelist and
+        not args.calculatechangelist and
         not args.capabilitylist and not args.sourcedescription and
         not args.resourcedump and not args.changedump):
         if (len(map)==0):
@@ -251,13 +252,14 @@ def main():
             c.parse_document()
         elif (args.explore):
             c.explore()
-        elif (args.newresourcelist):
-            c.write_newresource_list(paths=args.paths,
+        elif (args.calculatechangelist):
+            c.calculate_changelist(paths=args.paths,
                                   outfile=args.outfile,
-                                  ref_sitemap=args.reference,
+                                  resourcelist_sitemap=args.reference,
+                                  changelist_sitemap=args.newreference, 
                                   links=links)
         elif (args.resourcelist or args.resourcedump):
-            c.update_resource_list(paths=args.paths,
+            c.write_resource_list(paths=args.paths,
                                   outfile=args.outfile,
                                   links=links,
                                   dump=args.resourcedump)
