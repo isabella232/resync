@@ -10,12 +10,12 @@ import os
 from datetime import datetime
 import re
 import sys
-import StringIO
+import io
 import logging
-from urllib import URLopener
+from urllib.request import URLopener
 
-from resource_container import ResourceContainer
-from sitemap import Sitemap
+from .resource_container import ResourceContainer
+from .sitemap import Sitemap
 
 class ListBase(ResourceContainer):
     """Class that adds Sitemap based IO to ResourceContainer
@@ -88,7 +88,7 @@ class ListBase(ResourceContainer):
             except IOError as e:
                 raise Exception("Failed to load sitemap/sitemapindex from %s (%s)" % (uri,str(e)))
         elif (str is not None):
-            fh=StringIO.StringIO(str)
+            fh=io.StringIO(str)
         if (fh is None):
             raise Exception("Nothing to parse")
         s = self.new_sitemap()

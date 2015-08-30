@@ -5,10 +5,10 @@ import os
 import sys
 import logging
 from xml.etree.ElementTree import ElementTree, Element, parse, tostring
-import StringIO
+import io
 
-from resource import Resource
-from resource_container import ResourceContainer
+from .resource import Resource
+from .resource_container import ResourceContainer
 
 SITEMAP_NS = 'http://www.sitemaps.org/schemas/sitemap/0.9'
 RS_NS = 'http://www.openarchives.org/rs/terms/'
@@ -100,12 +100,12 @@ class Sitemap(object):
         tree = ElementTree(root);
         xml_buf=None
         if (fh is None):
-            xml_buf=StringIO.StringIO()
+            xml_buf=io.StringIO()
             fh=xml_buf
         if (sys.version_info < (2,7)):
             tree.write(fh,encoding='UTF-8')
         else:
-            tree.write(fh,encoding='UTF-8',xml_declaration=True,method='xml')
+            tree.write(fh,encoding='unicode',xml_declaration=True,method='xml')
         if (xml_buf is not None):
             return(xml_buf.getvalue())
 
@@ -249,7 +249,7 @@ class Sitemap(object):
             #must not specify method='xml' in python2.6
             return(tostring(e, encoding='UTF-8'))
         else:
-            return(tostring(e, encoding='UTF-8', method='xml'))
+            return("<?xml version='1.0' encoding='UTF-8'?>\n"+tostring(e, encoding='unicode', method='xml'))
 
     def resource_from_etree(self, etree, resource_class):
         """Construct a Resource from an etree
@@ -392,7 +392,7 @@ class Sitemap(object):
             atts  - dicts of attribute values. Attribute names are transformed
         """
         xml_atts = {}
-        for att in atts.keys():
+        for att in list(atts.keys()):
             val = atts[att]
             if (val is not None):
                 xml_atts[self._xml_att_name(att)] = str(val)

@@ -1,6 +1,6 @@
 import sys
 import unittest
-import StringIO
+import io
 import tempfile
 import os.path
 import shutil
@@ -66,14 +66,14 @@ class TestResourceListMultifile(unittest.TestCase):
         self.assertEquals( rl1.capability, 'resourcelist' )
         self.assertFalse( rl1.sitemapindex )
         i = iter(rl1)
-        self.assertEquals( i.next().uri, 'http://localhost/a' )
-        self.assertEquals( i.next().uri, 'http://localhost/b' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/a' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/b' )
         rl2 = ResourceList()
         rl2.read( os.path.join(tempdir,'sitemap00001.xml') )
         self.assertEquals( len(rl2), 2 )
         i = iter(rl2)
-        self.assertEquals( i.next().uri, 'http://localhost/c' )
-        self.assertEquals( i.next().uri, 'http://localhost/d' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/c' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/d' )
         # check the sitemapindex (read just as index)
         rli = ResourceList()
         rli.read( os.path.join(tempdir,'sitemap.xml'), index_only=True )
@@ -81,8 +81,8 @@ class TestResourceListMultifile(unittest.TestCase):
         i = iter(rli)
         self.assertEquals( rli.capability, 'resourcelist' )
         self.assertTrue( rli.sitemapindex )
-        self.assertEquals( i.next().uri, 'http://localhost/sitemap00000.xml' )
-        self.assertEquals( i.next().uri, 'http://localhost/sitemap00001.xml' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/sitemap00000.xml' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/sitemap00001.xml' )
         # check the sitemapindex and components
         rli = ResourceList( mapper=rl.mapper )
         rli.read( os.path.join(tempdir,'sitemap.xml') )
@@ -90,10 +90,10 @@ class TestResourceListMultifile(unittest.TestCase):
         self.assertEquals( rli.capability, 'resourcelist' )
         self.assertFalse( rli.sitemapindex )
         i = iter(rli)
-        self.assertEquals( i.next().uri, 'http://localhost/a' )
-        self.assertEquals( i.next().uri, 'http://localhost/b' )
-        self.assertEquals( i.next().uri, 'http://localhost/c' )
-        self.assertEquals( i.next().uri, 'http://localhost/d' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/a' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/b' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/c' )
+        self.assertEquals( i.__next__().uri, 'http://localhost/d' )
         # cleanup tempdir
         shutil.rmtree(tempdir)
 

@@ -18,14 +18,14 @@ import os.path
 import re
 import time
 import logging
-from urllib import URLopener
+from urllib.request import URLopener
 from xml.etree.ElementTree import parse
 
-from resource import Resource
-from resource_list import ResourceList
-from sitemap import Sitemap
-from utils import compute_md5_for_file
-from w3c_datetime import datetime_to_str
+from .resource import Resource
+from .resource_list import ResourceList
+from .sitemap import Sitemap
+from .utils import compute_md5_for_file
+from .w3c_datetime import datetime_to_str
 
 class ResourceListBuilder():
 
@@ -173,6 +173,7 @@ class ResourceListBuilder():
         if (self.set_md5):
             # add md5
             r.md5=compute_md5_for_file(file)
+            self.logger.error(r.md5)
         if (self.set_length):
             # add length
             r.length=file_stat.st_size

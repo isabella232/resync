@@ -1,5 +1,5 @@
 import unittest
-import StringIO
+import io
 import re
 from resync.resource import Resource
 from resync.change_list import ChangeList
@@ -60,11 +60,11 @@ class TestChangeList(unittest.TestCase):
         changes.add_changed_resources( added, change='created' )
         self.assertEqual(len(changes), 2, "2 things added")
         i = iter(changes)
-        first = i.next()
+        first = next(i)
         self.assertEqual(first.uri, 'a', "changes[0].uri=a")
         self.assertEqual(first.timestamp, 1, "changes[0].timestamp=1")
         self.assertEqual(first.change, 'created') #, "changes[0].change=createdd")
-        second = i.next()
+        second = next(i)
         self.assertEqual(second.timestamp, 4, "changes[1].timestamp=4")
         self.assertEqual(second.change, 'created', "changes[1].change=createdd")
         # Now add some with updated (one same, one diff)
@@ -103,7 +103,7 @@ class TestChangeList(unittest.TestCase):
 <url><loc>/tmp/rs_test/src/file_b</loc><lastmod>2012-03-14T18:37:36Z</lastmod><rs:md change="deleted" length="32" /></url>\
 </urlset>'
         cl=ChangeList()
-        cl.parse(fh=StringIO.StringIO(xml))
+        cl.parse(fh=io.StringIO(xml))
         self.assertEqual( len(cl.resources), 2, 'got 2 resources')
         self.assertEqual( cl.md['capability'], 'changelist', 'capability set' )
         self.assertEqual( cl.md['md_from'], '2013-01-01' )
@@ -115,7 +115,7 @@ class TestChangeList(unittest.TestCase):
 <url><loc>http://example.com/res1</loc><lastmod>2012-03-14T18:37:36Z</lastmod><rs:md change="updated"/></url>\
 </urlset>'
         cl=ChangeList()
-        self.assertRaises( SitemapParseError, cl.parse, fh=StringIO.StringIO(xml) )
+        self.assertRaises( SitemapParseError, cl.parse, fh=io.StringIO(xml) )
 
     def test32_parse_bad_capability(self):
         # the <rs:md capability="bad_capability".. should give error
@@ -125,7 +125,7 @@ class TestChangeList(unittest.TestCase):
 <url><loc>http://example.com/bad_res_1</loc><lastmod>2012-03-14T18:37:36Z</lastmod><rs:md change="updated"/></url>\
 </urlset>'
         cl=ChangeList()
-        self.assertRaises( SitemapParseError, cl.parse, fh=StringIO.StringIO(xml) )
+        self.assertRaises( SitemapParseError, cl.parse, fh=io.StringIO(xml) )
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestChangeList)

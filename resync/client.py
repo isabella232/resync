@@ -1,7 +1,7 @@
 """ResourceSync client implementation"""
 
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 import os.path
 import distutils.dir_util
 import re
@@ -21,7 +21,7 @@ from resync.url_authority import UrlAuthority
 from resync.utils import compute_md5_for_file
 from resync.client_state import ClientState
 from resync.list_base_with_index import ListBaseIndexError
-from w3c_datetime import str_to_datetime, datetime_to_str
+from .w3c_datetime import str_to_datetime, datetime_to_str
 
 
 class ClientFatalError(Exception):
@@ -397,7 +397,7 @@ class Client(object):
         else:
             # 1. GET
             try:
-                urllib.urlretrieve(resource.uri, file)
+                urllib.request.urlretrieve(resource.uri, file)
                 num_updated += 1
             except IOError as e:
                 msg = "Failed to GET %s -- %s" % (resource.uri, str(e))
@@ -473,14 +473,14 @@ class Client(object):
         s = Sitemap()
         self.logger.info("Reading sitemap(s) from %s ..." % (self.sitemap))
         try:
-            resource_container = s.parse_xml(urllib.urlopen(self.sitemap))
+            resource_container = s.parse_xml(urllib.request.urlopen(self.sitemap))
         except IOError as e:
             raise ClientFatalError("Cannot read document (%s)" % str(e))
         num_entries = len(resource_container.resources)
         capability = '(unknown capability)'
         if ('capability' in resource_container.md):
             capability = resource_container.md['capability']
-        print "Parsed %s document with %d entries" % (capability, num_entries)
+        print("Parsed %s document with %d entries" % (capability, num_entries))
         if (self.verbose):
             to_show = 100
             override_str = ' (override with --max-sitemap-entries)'
@@ -488,11 +488,11 @@ class Client(object):
                 to_show = self.max_sitemap_entries
                 override_str = ''
             if (num_entries > to_show):
-                print "Showing first %d entries sorted by "
+                print("Showing first %d entries sorted by ")
                 "URI%s..." % (to_show, override_str)
             n = 0
             for resource in resource_container:
-                print '[%d] %s' % (n, str(resource))
+                print('[%d] %s' % (n, str(resource)))
                 n += 1
                 if (n >= to_show):
                     break
@@ -506,13 +506,13 @@ class Client(object):
         uri = None
         if (self.sitemap_name is not None):
             uri = self.sitemap
-            print "Taking location from --sitemap option"
+            print("Taking location from --sitemap option")
             acceptable_capabilities = None  # ie. any
         elif (len(self.mapper) > 0):
-            pu = urlparse.urlparse(self.mapper.default_src_uri())
-            uri = urlparse.urlunparse(
+            pu = urllib.parse.urlparse(self.mapper.default_src_uri())
+            uri = urllib.parse.urlunparse(
                 [pu[0], pu[1], '/.well-known/resourcesync', '', '', ''])
-            print "Will look for discovery information based on mappings"
+            print("Will look for discovery information based on mappings")
             acceptable_capabilities = ['capabilitylist', 'capabilitylistindex']
         else:
             raise ClientFatalError(
@@ -521,7 +521,7 @@ class Client(object):
         inp = None
         checks = None
         while (inp != 'q'):
-            print
+            print()
             if (inp == 'b'):
                 if (len(history) < 2):
                     break  # can't do this, exit
@@ -531,7 +531,7 @@ class Client(object):
             history.append(uri)
             (uri, checks, acceptable_capabilities, inp) = self.explore_uri(
                 uri, checks, acceptable_capabilities, len(history) > 1)
-        print "--explore done, bye..."
+        print("--explore done, bye...")
 
     def explore_uri(self, uri, checks, caps, show_back=True):
         """Interactive exploration of document at uri
@@ -539,28 +539,28 @@ class Client(object):
         Will flag warnings if the document is not of type listed in caps
         """
         s = Sitemap()
-        print "Reading %s" % (uri)
+        print("Reading %s" % (uri))
         options = {}
         capability = None
         try:
             if (caps == 'resource'):
                 self.explore_show_head(uri, check_headers=checks)
             else:
-                resource_container = s.parse_xml(urllib.urlopen(uri))
+                resource_container = s.parse_xml(urllib.request.urlopen(uri))
                 (options, capability) = self.explore_show_summary(
                     resource_container, s.parsed_index, caps)
         except IOError as e:
-            print "Cannot read %s (%s)\nGoing back" % (uri, str(e))
+            print("Cannot read %s (%s)\nGoing back" % (uri, str(e)))
             return('', '', '', 'b')
         except Exception as e:
-            print "Cannot parse %s (%s)\nGoing back" % (uri, str(e))
+            print("Cannot parse %s (%s)\nGoing back" % (uri, str(e)))
             return('', '', '', 'b')
         while (True):
             # don't offer number option for no resources/capabilities
             num_prompt = '' if (len(options) == 0) else 'number, '
             up_prompt = 'b(ack), ' if (show_back) else ''
-            inp = raw_input("Follow [%s%sq(uit)]?" % (num_prompt, up_prompt))
-            if (inp in options.keys()):
+            inp = input("Follow [%s%sq(uit)]?" % (num_prompt, up_prompt))
+            if (inp in list(options.keys())):
                 break
             if (inp == 'q' or inp == 'b'):
                 return('', '', '', inp)
@@ -595,9 +595,9 @@ class Client(object):
             capability = list.md['capability']
         if (parsed_index):
             capability += 'index'
-        print "Parsed %s document with %d entries:" % (capability, num_entries)
+        print("Parsed %s document with %d entries:" % (capability, num_entries))
         if (caps is not None and capability not in caps):
-            print "WARNING - expected a %s document" % (','.join(caps))
+            print("WARNING - expected a %s document" % (','.join(caps)))
         to_show = num_entries
         if (num_entries > 21):
             to_show = 20
@@ -615,22 +615,22 @@ class Client(object):
         n = 0
         if ('up' in list.ln):
             options['up'] = list.ln['up']
-            print "[%s] %s" % ('up', list.ln['up'].uri)
+            print("[%s] %s" % ('up', list.ln['up'].uri))
         for r in list.resources:
             if (n >= to_show):
-                print "(not showing remaining %d entries)" % (num_entries - n)
+                print("(not showing remaining %d entries)" % (num_entries - n))
                 break
             n += 1
             options[str(n)] = r
-            print "[%d] %s" % (n, r.uri)
+            print("[%d] %s" % (n, r.uri))
             if (r.capability is not None):
                 warning = ''
                 if (r.capability not in entry_caps):
                     warning = " (EXPECTED %s)" % (' or '.join(entry_caps))
-                print "  %s%s" % (r.capability, warning)
+                print("  %s%s" % (r.capability, warning))
             elif (len(entry_caps) == 1):
                 r.capability = entry_caps[0]
-                print "  capability not specified, should be %s"
+                print("  capability not specified, should be %s")
                 "" % (r.capability)
         return(options, capability)
 
@@ -640,9 +640,9 @@ class Client(object):
         Will also check headers against any values specified in
         check_headers.
         """
-        print "HEAD %s" % (uri)
+        print("HEAD %s" % (uri))
         response = requests.head(uri)
-        print "  status: %s" % (response.status_code)
+        print("  status: %s" % (response.status_code))
         # generate normalized lastmod
 #        if ('last-modified' in response.headers):
 #            response.headers.add['lastmod'] =
@@ -658,7 +658,7 @@ class Client(object):
                         check_str = ' MATCHES EXPECTED VALUE'
                     else:
                         check_str = ' EXPECTED %s' % (check_headers[header])
-                print "  %s: %s%s"
+                print("  %s: %s%s")
                 "" % (header, response.headers[header], check_str)
 
     def calculate_changelist(self, paths=None, outfile=None,
@@ -699,7 +699,7 @@ class Client(object):
         if (self.max_sitemap_entries is not None):
             cl.max_sitemap_entries = self.max_sitemap_entries
         if (outfile is None):
-            print cl.as_xml()
+            print(cl.as_xml())
         else:
             cl.write(basename=outfile)
 
@@ -727,7 +727,7 @@ class Client(object):
         else:
             if (outfile is None):
                 try:
-                    print rl.as_xml()
+                    print(rl.as_xml())
                 except ListBaseIndexError as e:
                     raise ClientFatalError(
                         "%s. Use --output option to specify base name for "
@@ -768,7 +768,7 @@ class Client(object):
         if (self.max_sitemap_entries is not None):
             cl.max_sitemap_entries = self.max_sitemap_entries
         if (outfile is None):
-            print cl.as_xml()
+            print(cl.as_xml())
         else:
             cl.write(basename=outfile)
         self.write_dump_if_requested(cl, dump)
@@ -779,10 +779,10 @@ class Client(object):
         capl = CapabilityList(ln=links)
         capl.pretty_xml = self.pretty_xml
         if (capabilities is not None):
-            for name in capabilities.keys():
+            for name in list(capabilities.keys()):
                 capl.add_capability(name=name, uri=capabilities[name])
         if (outfile is None):
-            print capl.as_xml()
+            print(capl.as_xml())
         else:
             capl.write(basename=outfile)
 
@@ -795,7 +795,7 @@ class Client(object):
             for uri in capability_lists:
                 rsd.add_capability_list(uri)
         if (outfile is None):
-            print rsd.as_xml()
+            print(rsd.as_xml())
         else:
             rsd.write(basename=outfile)
 
@@ -827,11 +827,11 @@ class Client(object):
                 to_show = self.max_sitemap_entries
                 override_str = ''
             if (num_entries > to_show):
-                print "Showing first %d entries sorted by URI%s..."
+                print("Showing first %d entries sorted by URI%s...")
                 "" % (to_show, override_str)
             n = 0
             for r in rl.resources:
-                print r
+                print(r)
                 n += 1
                 if (n >= to_show):
                     break

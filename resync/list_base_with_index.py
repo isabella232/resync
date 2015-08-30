@@ -11,14 +11,14 @@ from datetime import datetime
 import re
 import sys
 import itertools
-from urllib import URLopener
+from urllib.request import URLopener
 
-from list_base import ListBase
-from resource import Resource
-from sitemap import Sitemap
-from mapper import Mapper, MapperError
-from url_authority import UrlAuthority
-from utils import compute_md5_for_file
+from .list_base import ListBase
+from .resource import Resource
+from .sitemap import Sitemap
+from .mapper import Mapper, MapperError
+from .url_authority import UrlAuthority
+from .utils import compute_md5_for_file
 
 class ListBaseIndexError(Exception):
     """Exception for problems with sitemapindexes"""
@@ -335,10 +335,10 @@ class ListBaseWithIndex(ListBase):
                 break
         # Get next to see whether there are more resources
         try:
-            next = resource_iter.next()
+            n = next(resource_iter)
         except StopIteration:
-            next = None
-        return(chunk,next)
+            n = None
+        return(chunk, n)
 
     def part_name(self, basename='/tmp/sitemap.xml', part_number=0):
         """Name (file or URI) for one component sitemap

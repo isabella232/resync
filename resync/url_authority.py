@@ -24,7 +24,7 @@ Example use:
         # will be false
 """
 
-import urlparse
+import urllib.parse
 import os.path
 
 class UrlAuthority(object):
@@ -42,7 +42,7 @@ class UrlAuthority(object):
 
     def set_master(self, url):
         """Set the master url that this object works with"""
-        m = urlparse.urlparse(url)
+        m = urllib.parse.urlparse(url)
         self.master_scheme=m.scheme
         self.master_netloc=m.netloc
         self.master_path=os.path.dirname(m.path)
@@ -54,7 +54,7 @@ class UrlAuthority(object):
         just that the server names match or the query url is a 
         sub-domain of the master
         """
-        s = urlparse.urlparse(url)
+        s = urllib.parse.urlparse(url)
         if (s.scheme != self.master_scheme):
             return(False)
         if (s.netloc != self.master_netloc):

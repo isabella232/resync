@@ -43,9 +43,9 @@ object that contains such information.
 """
 
 import re
-from urlparse import urlparse
+from urllib.parse import urlparse
 from posixpath import basename
-from w3c_datetime import str_to_datetime, datetime_to_str
+from .w3c_datetime import str_to_datetime, datetime_to_str
 
 
 class ChangeTypeError(Exception):

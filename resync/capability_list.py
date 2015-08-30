@@ -7,10 +7,10 @@ and links like other lists.
 
 import collections
 
-from resource import Resource
-from resource_set import ResourceSet
-from list_base import ListBase
-from sitemap import Sitemap
+from .resource import Resource
+from .resource_set import ResourceSet
+from .list_base import ListBase
+from .sitemap import Sitemap
 
 class CapabilitySet(ResourceSet):
     """Class for storage of resources in a Capability List
@@ -36,7 +36,7 @@ class CapabilitySet(ResourceSet):
         self._iter_next_list = []
         # look through all resources and build capability to uri index
         uris = {}
-        for uri in self.keys():
+        for uri in list(self.keys()):
             cap = self[uri].capability
             if (cap not in uris):
                 uris[cap]=[]

@@ -2,7 +2,7 @@
 import os
 import os.path
 import re
-import urlparse
+import urllib.parse
 import logging
 
 class MapperError(Exception):
@@ -104,7 +104,7 @@ class Mapper():
         In the case that uri is already a local path then the same path
         is returned.
         """
-        (scheme, netloc, path, params, query, fragment) = urlparse.urlparse( uri )
+        (scheme, netloc, path, params, query, fragment) = urllib.parse.urlparse( uri )
         if (netloc == ''):
             return(uri)
         path = '/'.join([netloc,path])
@@ -171,7 +171,7 @@ class Map:
         Applies only to local source. Returns True if the paths for source and 
         destination are the same, or if one is a component of the other path.
         """
-        (scheme, netloc, path, params, query, fragment) = urlparse.urlparse( self.src_uri )
+        (scheme, netloc, path, params, query, fragment) = urllib.parse.urlparse( self.src_uri )
         if (scheme != ''):
             return(False)
         s = os.path.normpath(self.src_uri)

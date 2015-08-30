@@ -1,5 +1,5 @@
 import unittest
-import StringIO
+import io
 import re
 from resync.resource import Resource
 from resync.resource_list import ResourceList, ResourceListDupeError
@@ -17,8 +17,8 @@ class TestResourceList(unittest.TestCase):
         ( same, changed, deleted, added ) = dst.compare(src)
         self.assertEqual( len(same), 2, "2 things unchanged" )
         i = iter(same)
-        self.assertEqual( i.next().uri, 'a', "first was a" )
-        self.assertEqual( i.next().uri, 'b', "second was b" )
+        self.assertEqual( i.__next__().uri, 'a', "first was a" )
+        self.assertEqual( i.__next__().uri, 'b', "second was b" )
         self.assertEqual( len(changed), 0, "nothing changed" )
         self.assertEqual( len(deleted), 0, "nothing deleted" )
         self.assertEqual( len(added), 0, "nothing added" )
@@ -34,8 +34,8 @@ class TestResourceList(unittest.TestCase):
         self.assertEqual( len(same), 0, "0 things unchanged" )
         self.assertEqual( len(changed), 2, "2 things changed" )
         i = iter(changed)
-        self.assertEqual( i.next().uri, 'a', "first was a" )
-        self.assertEqual( i.next().uri, 'b', "second was b" )
+        self.assertEqual( i.__next__().uri, 'a', "first was a" )
+        self.assertEqual( i.__next__().uri, 'b', "second was b" )
         self.assertEqual( len(deleted), 0, "nothing deleted" )
         self.assertEqual( len(added), 0, "nothing added" )
 
@@ -53,8 +53,8 @@ class TestResourceList(unittest.TestCase):
         self.assertEqual( len(changed), 0, "nothing changed" )
         self.assertEqual( len(deleted), 2, "c and d deleted" )
         i = iter(deleted)
-        self.assertEqual( i.next().uri, 'c', "first was c" )
-        self.assertEqual( i.next().uri, 'd', "second was d" )
+        self.assertEqual( i.__next__().uri, 'c', "first was c" )
+        self.assertEqual( i.__next__().uri, 'd', "second was d" )
         self.assertEqual( len(added), 0, "nothing added" )
 
     def test04_added(self):
@@ -72,8 +72,8 @@ class TestResourceList(unittest.TestCase):
         self.assertEqual( len(deleted), 0, "nothing deleted" )
         self.assertEqual( len(added), 2, "b and d added" )
         i = iter(added)
-        self.assertEqual( i.next().uri, 'b', "first was b" )
-        self.assertEqual( i.next().uri, 'd', "second was d" )
+        self.assertEqual( i.__next__().uri, 'b', "first was b" )
+        self.assertEqual( i.__next__().uri, 'd', "second was d" )
 
     def test05_add(self):
         r1 = Resource(uri='a',length=1)
@@ -131,7 +131,7 @@ class TestResourceList(unittest.TestCase):
         rl.add( Resource('a',timestamp=1) )
         rl.add( Resource('b',timestamp=2) )
         xml = rl.as_xml()
-        print xml
+        print(xml)
         self.assertTrue( re.search(r'<rs:md .*capability="resourcelist"', xml), 'XML has capability' )
         self.assertTrue( re.search(r'<url><loc>a</loc><lastmod>1970-01-01T00:00:01Z</lastmod></url>', xml), 'XML has resource a' ) 
 
@@ -143,7 +143,7 @@ class TestResourceList(unittest.TestCase):
 <url><loc>/tmp/rs_test/src/file_b</loc><lastmod>2012-03-14T18:37:36Z</lastmod><rs:md length="32" /></url>\
 </urlset>'
         rl=ResourceList()
-        rl.parse(fh=StringIO.StringIO(xml))
+        rl.parse(fh=io.StringIO(xml))
         self.assertEqual( len(rl.resources), 2, 'got 2 resources')
         self.assertEqual( rl.md['capability'], 'resourcelist', 'capability set' )
         self.assertEqual( rl.md_at, '2013-08-07' )
@@ -155,7 +155,7 @@ class TestResourceList(unittest.TestCase):
 <url><loc>http://example.com/res1</loc><lastmod>2012-03-14T18:37:36Z</lastmod></url>\
 </urlset>'
         rl=ResourceList()
-        rl.parse(fh=StringIO.StringIO(xml))
+        rl.parse(fh=io.StringIO(xml))
         self.assertEqual( len(rl.resources), 1, 'got 1 resource')
         self.assertEqual( rl.md['capability'], 'resourcelist', 'capability set by reading routine' )
         self.assertFalse( 'from' in rl.md )
@@ -168,7 +168,7 @@ class TestResourceList(unittest.TestCase):
 <url><loc>http://example.com/bad_res_1</loc><lastmod>2012-03-14T18:37:36Z</lastmod></url>\
 </urlset>'
         rl=ResourceList()
-        self.assertRaises( SitemapParseError, rl.parse, fh=StringIO.StringIO(xml) )
+        self.assertRaises( SitemapParseError, rl.parse, fh=io.StringIO(xml) )
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestResourceList)

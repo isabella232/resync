@@ -6,15 +6,15 @@ of the last change seen.
 """
 
 import sys
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 import os.path
 import datetime
 import distutils.dir_util 
 import re
 import time
 import logging
-import ConfigParser
+import configparser
 
 
 class ClientState(object):
@@ -29,7 +29,7 @@ class ClientState(object):
         
         FIXME - should have some file lock to avoid race
         """
-        parser = ConfigParser.SafeConfigParser()
+        parser = configparser.SafeConfigParser()
         parser.read(self.status_file)
         status_section = 'incremental'
         if (not parser.has_section(status_section)):
@@ -44,15 +44,15 @@ class ClientState(object):
 
     def get_state(self,site):
         """Read client status file and return dict"""
-        parser = ConfigParser.SafeConfigParser()
+        parser = configparser.SafeConfigParser()
         status_section = 'incremental'
         parser.read(self.status_file)
         timestamp = None
         try:
             timestamp = float(parser.get(status_section,self.config_site_to_name(site)))
-        except ConfigParser.NoSectionError as e:
+        except configparser.NoSectionError as e:
             pass
-        except ConfigParser.NoOptionError as e:
+        except configparser.NoOptionError as e:
             pass
         return(timestamp)
 

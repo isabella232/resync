@@ -1,7 +1,7 @@
 import unittest
 import re
 import logging
-import sys, StringIO, contextlib
+import sys, io, contextlib
 
 from resync.client import Client, ClientFatalError
 from resync.capability_list import CapabilityList
@@ -15,7 +15,7 @@ class Data(object):
 @contextlib.contextmanager
 def capture_stdout():
     old = sys.stdout
-    capturer = StringIO.StringIO()
+    capturer = io.StringIO()
     sys.stdout = capturer
     data = Data()
     yield data
