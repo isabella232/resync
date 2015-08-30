@@ -16,6 +16,7 @@ resync.egg-info
 .project
 .pydevproject
 *.pyc
+*.bak
 *~
 rc
 re
