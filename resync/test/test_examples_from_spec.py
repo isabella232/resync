@@ -37,6 +37,7 @@ class TestExamplesFromSpec(unittest.TestCase):
             s=Sitemap()
             fh = self._open_ex(ex)
             si = s.parse_xml( fh=fh )
+            fh.close()
 
     def test_ex_01(self):
         """resourcesync_ex_1 is a simple resource_list with 2 resources, no metadata"""
@@ -155,8 +156,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         rl.md_at = '2013-01-03T09:00:00Z'
         rl.add( Resource('http://example.com/res1') )
         rl.add( Resource('http://example.com/res2') )
-        ex_xml = self._open_ex('resourcesync_ex_1').read()
+        fh = self._open_ex('resourcesync_ex_1')
+        ex_xml = fh.read()
         self._assert_xml_equal( rl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_02(self):
         """Slightly more complex Resource List document """
@@ -170,8 +173,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                        md5='1e0d5cb8ef6ba40c99b14c0237be735e')
         r2.link_set(rel="duplicate",href="http://mirror.example.com/res2")
         rl.add( r2 )
-        ex_xml = self._open_ex('resourcesync_ex_2').read()
+        fh = self._open_ex('resourcesync_ex_2')
+        ex_xml = fh.read()
         self._assert_xml_equal( rl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_03(self):
         """Simple Change List document """
@@ -184,8 +189,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         cl.add( Resource(uri='http://example.com/res3.tiff',
                          lastmod='2013-01-02T18:00:00Z',
                          change='deleted') )
-        ex_xml = self._open_ex('resourcesync_ex_3').read()
+        fh = self._open_ex('resourcesync_ex_3')
+        ex_xml = fh.read()
         self._assert_xml_equal( cl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_04(self):
         """Simple Resource Dump document """
@@ -193,8 +200,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         rd.md_at = '2013-01-03T09:00:00Z'
         rd.add( Resource(uri='http://example.com/resourcedump.zip',
                          lastmod='2013-01-03T09:00:00Z') )
-        ex_xml = self._open_ex('resourcesync_ex_4').read()
+        fh = self._open_ex('resourcesync_ex_4')
+        ex_xml = fh.read()
         self._assert_xml_equal( rd.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_05(self):
         """Simple Resource Dump Manifest document """
@@ -208,8 +217,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                           lastmod='2013-01-03T04:00:00Z',
                           md5='1e0d5cb8ef6ba40c99b14c0237be735e',
                           path='/resources/res2') )
-        ex_xml = self._open_ex('resourcesync_ex_5').read()
+        fh = self._open_ex('resourcesync_ex_5')
+        ex_xml = fh.read()
         self._assert_xml_equal( rdm.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_06(self):
         """Simple Capability List document """
@@ -219,8 +230,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         cl.add_capability( uri='http://example.com/dataset1/resourcelist.xml', name='resourcelist' )
         cl.add_capability( uri='http://example.com/dataset1/resourcedump.xml', name='resourcedump' )
         cl.add_capability( uri='http://example.com/dataset1/changelist.xml', name='changelist' )
-        ex_xml = self._open_ex('resourcesync_ex_6').read()
+        fh = self._open_ex('resourcesync_ex_6')
+        ex_xml = fh.read()
         self._assert_xml_equal( cl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_07(self):
         """A Source Description document """
@@ -231,8 +244,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         r.link_set( rel='describedby',
                     href='http://example.com/info_about_set1_of_resources.xml' )
         sd.add( r )
-        ex_xml = self._open_ex('resourcesync_ex_7').read()
+        fh = self._open_ex('resourcesync_ex_7')
+        ex_xml = fh.read()
         self._assert_xml_equal( sd.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_08(self):
         """Simple Resource List Index document
@@ -247,8 +262,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         rli.md_at = '2013-01-03T09:00:00Z'
         rli.add( Resource(uri='http://example.com/resourcelist-part1.xml') )
         rli.add( Resource(uri='http://example.com/resourcelist-part2.xml') )
-        ex_xml = self._open_ex('resourcesync_ex_8').read()
+        fh = self._open_ex('resourcesync_ex_8')
+        ex_xml = fh.read()
         self._assert_xml_equal( rli.as_xml(), ex_xml )
+        fh.close()
 
     # Examples 9, 10, 11 in the spec are not XML documents
 
@@ -265,8 +282,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         cl3 = CapabilityList( uri='http://example.com/capabilitylist3.xml' )
         cl3.describedby = 'http://example.com/info_about_set3_of_resources.xml'
         sd.add_capability_list( cl3 )
-        ex_xml = self._open_ex('resourcesync_ex_12').read()
+        fh = self._open_ex('resourcesync_ex_12')
+        ex_xml = fh.read()
         self._assert_xml_equal( sd.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_13(self):
         """Capability List document with 4 entries"""
@@ -277,8 +296,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         cl.add_capability( capability=ResourceDump( uri='http://example.com/dataset1/resourcedump.xml' ) )
         cl.add_capability( capability=ChangeList( uri='http://example.com/dataset1/changelist.xml' ) )
         cl.add_capability( capability=ChangeDump( uri='http://example.com/dataset1/changedump.xml' ) )
-        ex_xml = self._open_ex('resourcesync_ex_13').read()
+        fh = self._open_ex('resourcesync_ex_13')
+        ex_xml = fh.read()
         self._assert_xml_equal( cl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_14(self):
         """Resource List with 2 entries and some metadata"""
@@ -297,8 +318,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                           sha256='854f61290e2e197a11bc91063afce22e43f8ccc655237050ace766adc68dc784',
                           length=14599,
                           mime_type="application/pdf" ))
-        ex_xml = self._open_ex('resourcesync_ex_14').read()
+        fh = self._open_ex('resourcesync_ex_14')
+        ex_xml = fh.read()
         self._assert_xml_equal( rl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_15(self):
         """Resource List Index with metadata"""
@@ -313,8 +336,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                           md_at='2013-01-03T09:03:00Z' ))
         rl.add( Resource( uri='http://example.com/resourcelist3.xml',
                           md_at='2013-01-03T09:07:00Z' ))
-        ex_xml = self._open_ex('resourcesync_ex_15').read()
+        fh = self._open_ex('resourcesync_ex_15')
+        ex_xml = fh.read()
         self._assert_xml_equal( rl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_16(self):
         rl = ResourceList()
@@ -331,8 +356,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                           md5='4556abdf8ebdc9802ac0c6a7402c9881',
                           length=883,
                           mime_type="image/png" ))
-        ex_xml = self._open_ex('resourcesync_ex_16').read()
+        fh = self._open_ex('resourcesync_ex_16')
+        ex_xml = fh.read()
         self._assert_xml_equal( rl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_17(self):
         """Resource Dump with 3 entries and some metadata"""
@@ -367,8 +394,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                      href="http://example.com/resourcedump_manifest-part3.xml",
                      mime_type="application/xml" )
         rd.add( z3 )
-        ex_xml = self._open_ex('resourcesync_ex_17').read()
+        fh = self._open_ex('resourcesync_ex_17')
+        ex_xml = fh.read()
         self._assert_xml_equal( rd.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_18(self):
         """Resource Dump Manifest with 2 entries and some metadata"""
@@ -389,8 +418,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                            length=14599,
                            mime_type='application/pdf',
                            path='/resources/res2') )
-        ex_xml = self._open_ex('resourcesync_ex_18').read()
+        fh = self._open_ex('resourcesync_ex_18')
+        ex_xml = fh.read()
         self._assert_xml_equal( rdm.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_19(self):
         """Change List with 4 changes, 'open' as no until"""
@@ -409,8 +440,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         cl.add( Resource( uri='http://example.com/res2.pdf',
                           lastmod='2013-01-03T21:00:00Z',
                           change='updated' ) )
-        ex_xml = self._open_ex('resourcesync_ex_19').read()
+        fh = self._open_ex('resourcesync_ex_19')
+        ex_xml = fh.read()
         self._assert_xml_equal( cl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_20(self):
         """Change List Index listing 3 Change Lists, the last one 'open'"""
@@ -427,8 +460,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                           md_until='2013-01-03T00:00:00Z') )
         cl.add( Resource( uri='http://example.com/20130103-changelist.xml',
                           md_from='2013-01-03T00:00:00Z') )
-        ex_xml = self._open_ex('resourcesync_ex_20').read()
+        fh = self._open_ex('resourcesync_ex_20')
+        ex_xml = fh.read()
         self._assert_xml_equal( cl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_21(self):
         """Change List which points back to index"""
@@ -449,8 +484,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         cl.add( Resource( uri='http://example.com/res7.html',
                           lastmod='2013-01-02T20:00:00Z',
                           change='updated' ) )
-        ex_xml = self._open_ex('resourcesync_ex_21').read()
+        fh = self._open_ex('resourcesync_ex_21')
+        ex_xml = fh.read()
         self._assert_xml_equal( cl.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_ex_22(self):
         """Change Dump with three dump files"""
@@ -479,8 +516,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                        mime_type="application/zip" )
         z3.contents='http://example.com/20130103-changedump-manifest.xml'
         cd.add( [z1, z2, z3] )
-        ex_xml = self._open_ex('resourcesync_ex_22').read()
-        self._assert_xml_equal( cd.as_xml(), ex_xml ) 
+        fh = self._open_ex('resourcesync_ex_22')
+        ex_xml = fh.read()
+        self._assert_xml_equal( cd.as_xml(), ex_xml )
+        fh.close() 
 
     def test_build_ex_23(self):
         cdm = ChangeDumpManifest()
@@ -737,8 +776,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                            md_at='2012-12-03T09:00:00Z') )
         rla.add( Resource( uri='http://example.com/resourcelist3.xml',
                            md_at='2013-01-03T09:00:00Z') )
-        ex_xml = self._open_ex('archives_ex_3_1').read()
+        fh = self._open_ex('archives_ex_3_1')
+        ex_xml = fh.read()
         self._assert_xml_equal( rla.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_archives_ex_3_2(self):
         """Resource List Archive Index listing 2 component Resource List Archives"""
@@ -747,8 +788,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         rlai.up = 'http://example.com/dataset1/capabilitylist.xml'
         rlai.add( Resource( uri='http://example.com/resourcelistarchive00001.xml' ))
         rlai.add( Resource( uri='http://example.com/resourcelistarchive00002.xml' ))
-        ex_xml = self._open_ex('archives_ex_3_2').read()
+        fh = self._open_ex('archives_ex_3_2')
+        ex_xml = fh.read()
         self._assert_xml_equal( rlai.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_archives_ex_4_1(self):
         """Resource Dump Archive listing 2 Resource Dumps"""
@@ -763,8 +806,10 @@ class TestExamplesFromSpec(unittest.TestCase):
                            lastmod='2012-12-03T09:06:12Z',
                            md_at="2012-12-03T09:00:00Z",
                            md_completed="2012-12-03T09:05:17Z" ) )
-        ex_xml = self._open_ex('archives_ex_4_1').read()
+        fh = self._open_ex('archives_ex_4_1')
+        ex_xml = fh.read()
         self._assert_xml_equal( rda.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_archives_ex_5_1(self):
         """Change List Archive listing 3 Change Lists"""
@@ -779,8 +824,10 @@ class TestExamplesFromSpec(unittest.TestCase):
         cla.add( Resource( uri='http://example.com/changelist3.xml',
                            md_from='2013-01-03T09:00:00Z',
                            md_until='2013-01-04T09:00:00Z') )
-        ex_xml = self._open_ex('archives_ex_5_1').read()
+        fh = self._open_ex('archives_ex_5_1')
+        ex_xml = fh.read()
         self._assert_xml_equal( cla.as_xml(), ex_xml )
+        fh.close()
 
     def test_build_archives_ex_6_1(self):
         """Change Dump Archive listing 2 Change Dumps"""
@@ -794,15 +841,19 @@ class TestExamplesFromSpec(unittest.TestCase):
                            lastmod='2012-12-27T09:01:57Z',
                            md_from="2012-01-20T09:00:00Z",
                            md_until="2013-01-27T09:00:00Z" ) )
-        ex_xml = self._open_ex('archives_ex_6_1').read()
+        fh = self._open_ex('archives_ex_6_1')
+        ex_xml = fh.read()
         self._assert_xml_equal( cda.as_xml(), ex_xml )
+        fh.close()
 
 ##### UTILITIES FOR (APPROX) COMPARISON OF XML IN EXAMPLES AND OUTPUT
 
     def _assert_xml_equal_ex(self,xml,ex):
         """Compare XML supplied with XML from example file ex"""
-        ex_xml = self._open_ex(ex).read()
+        fh = self._open_ex(ex)
+        ex_xml = fh.read()
         self._assert_xml_equal( xml, ex_xml )
+        fh.close()
 
     def _assert_xml_equal(self,a,b):
         context = "Element mismatch in\n%s\nvs\n%s\n" % (a,b);
