@@ -48,7 +48,8 @@ up [http://docs.python.org/library/base64.html]
 
 def compute_md5_for_string(string):
     """Compute MD5 digest over some string payload"""
-    return base64.b64encode(hashlib.md5(string.encode('utf-8')).digest()).decode('utf-8')
+    return base64.b64encode(hashlib.md5(
+            string.encode('utf-8')).digest()).decode('utf-8')
 
 
 def compute_md5_for_file(filename, block_size=2**14):

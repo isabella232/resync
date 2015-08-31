@@ -13,4 +13,3 @@ from .change_dump import ChangeDump
 from resync.change_dump import ChangeDump
 from .archives import ResourceListArchive,ResourceDumpArchive,ChangeListArchive,ChangeDumpArchive
 from .resource import Resource
-

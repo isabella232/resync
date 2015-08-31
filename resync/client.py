@@ -1,6 +1,6 @@
 """ResourceSync client implementation"""
 
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
 import urllib.parse
 import os.path
 import distutils.dir_util
@@ -371,8 +371,7 @@ class Client(object):
         # 9. Done
         self.logger.debug("Completed incremental sync")
 
-    # third parameter: 'file'
-    def update_resource(self, resource, _, change=None):
+    def update_resource(self, resource, filename, change=None):
         """Update resource from uri to file on local system
 
         Update means three things:
@@ -388,16 +387,16 @@ class Client(object):
 
         Returns the number of resources updated/created (0 or 1)
         """
-        path = os.path.dirname(file)
+        path = os.path.dirname(filename)
         distutils.dir_util.mkpath(path)
         num_updated = 0
         if (self.dryrun):
             self.logger.info("dryrun: would GET %s --> %s" %
-                             (resource.uri, file))
+                             (resource.uri, filename))
         else:
             # 1. GET
             try:
-                urllib.request.urlretrieve(resource.uri, file)
+                urllib.request.urlretrieve(resource.uri, filename)
                 num_updated += 1
             except IOError as e:
                 msg = "Failed to GET %s -- %s" % (resource.uri, str(e))
@@ -409,26 +408,25 @@ class Client(object):
             # 2. set timestamp if we have one
             if (resource.timestamp is not None):
                 unixtime = int(resource.timestamp)  # no fractional
-                os.utime(file, (unixtime, unixtime))
+                os.utime(filename, (unixtime, unixtime))
                 if (resource.timestamp > self.last_timestamp):
                     self.last_timestamp = resource.timestamp
             self.log_event(Resource(resource=resource, change=change))
             # 3. sanity check
-            length = os.stat(file).st_size
+            length = os.stat(filename).st_size
             if (resource.length != length):
                 self.logger.info("Downloaded size for %s of %d bytes does not "
                                  "match expected %d bytes"
                                  % (resource.uri, length, resource.length))
             if (self.checksum and resource.md5 is not None):
-                file_md5 = compute_md5_for_file(file)
+                file_md5 = compute_md5_for_file(filename)
                 if (resource.md5 != file_md5):
                     self.logger.info("MD5 mismatch for %s, got %s but expected"
                                      " %s bytes" % (resource.uri, file_md5,
                                                     resource.md5))
         return(num_updated)
 
-    # third parameter: file
-    def delete_resource(self, resource, _, allow_deletion=False):
+    def delete_resource(self, resource, filename, allow_deletion=False):
         """Delete copy of resource in file on local system
 
         Will only actually do the deletion if allow_deletion is True.
@@ -444,20 +442,21 @@ class Client(object):
             self.last_timestamp = resource.timestamp
         if (allow_deletion):
             if (self.dryrun):
-                self.logger.info("dryrun: would delete %s -> %s" % (uri, file))
+                self.logger.info("dryrun: would delete %s -> %s"
+                                 "" % (uri, filename))
             else:
                 try:
-                    os.unlink(file)
+                    os.unlink(filename)
                     num_deleted += 1
                 except OSError as e:
                     msg = "Failed to DELETE %s -> %s : %s" % (
-                        uri, file, str(e))
+                        uri, filename, str(e))
                     # if (self.ignore_failures):
                     self.logger.warning(msg)
                     #    return
                     # else:
                     #    raise ClientFatalError(msg)
-                self.logger.info("deleted: %s -> %s" % (uri, file))
+                self.logger.info("deleted: %s -> %s" % (uri, filename))
                 self.log_event(Resource(resource=resource, change="deleted"))
         else:
             self.logger.info(
@@ -473,7 +472,8 @@ class Client(object):
         s = Sitemap()
         self.logger.info("Reading sitemap(s) from %s ..." % (self.sitemap))
         try:
-            resource_container = s.parse_xml(urllib.request.urlopen(self.sitemap))
+            resource_container = s.parse_xml(
+                          urllib.request.urlopen(self.sitemap))
         except IOError as e:
             raise ClientFatalError("Cannot read document (%s)" % str(e))
         num_entries = len(resource_container.resources)
@@ -595,7 +595,8 @@ class Client(object):
             capability = list.md['capability']
         if (parsed_index):
             capability += 'index'
-        print("Parsed %s document with %d entries:" % (capability, num_entries))
+        print("Parsed %s document with %d entries:"
+              "" % (capability, num_entries))
         if (caps is not None and capability not in caps):
             print("WARNING - expected a %s document" % (','.join(caps)))
         to_show = num_entries
