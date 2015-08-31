@@ -7,6 +7,7 @@ Extends ListBase to add support for sitemapindexes.
 import collections
 import math 
 import os
+import urllib.request
 from datetime import datetime
 import re
 import sys
@@ -81,7 +82,8 @@ class ListBaseWithIndex(ListBase):
         are mapped to the filesystem also.
         """
         try:
-            fh = URLopener().open(uri)
+            #fh = URLopener().open(uri)
+            fh = urllib.request.urlopen(uri)
             self.num_files += 1
         except IOError as e:
             raise IOError("Failed to load sitemap/sitemapindex from %s (%s)" % (uri,str(e)))
@@ -97,6 +99,7 @@ class ListBaseWithIndex(ListBase):
         self.logger.info( "Read sitemap/sitemapindex from %s" % (uri) )
         s = self.new_sitemap()
         s.parse_xml(fh=fh,resources=self,capability=self.capability_name)
+        fh.close()
         # what did we read? sitemap or sitemapindex?
         if (s.parsed_index):
             # sitemapindex
@@ -113,6 +116,8 @@ class ListBaseWithIndex(ListBase):
             self.resources = self.resources_class()
             self.logger.info( "Now reading %d sitemaps" % len(sitemaps.uris()) )
             for sitemap_uri in sorted(sitemaps.uris()):
+                if(not sitemap_uri.startswith('http')):
+                    sitemap_uri = 'file://' + os.path.abspath(sitemap_uri)
                 self.read_component_sitemap(uri,sitemap_uri,s,sitemapindex_is_file)
         else:
             # sitemap
@@ -137,7 +142,7 @@ class ListBaseWithIndex(ListBase):
                     not UrlAuthority(sitemapindex_uri).has_authority_over(sitemap_uri)):
                     raise ListBaseIndexError("The sitemapindex (%s) refers to sitemap at a location it does not have authority over (%s)" % (sitemapindex_uri,sitemap_uri))
         try:
-            fh = URLopener().open(sitemap_uri)
+            fh = urllib.request.urlopen(sitemap_uri)
             self.num_files += 1
         except IOError as e:
             raise ListBaseIndexError("Failed to load sitemap from %s listed in sitemap index %s (%s)" % (sitemap_uri,sitemapindex_uri,str(e)))
@@ -153,6 +158,7 @@ class ListBaseWithIndex(ListBase):
         # Copy resources into self, check any metadata
         for r in component:
             self.resources.add(r)
+        fh.close()
         # FIXME - if rel="up" check it goes to correct place
         # FIXME - check capability
 

@@ -12,7 +12,7 @@ import re
 import sys
 import io
 import logging
-from urllib.request import URLopener
+import urllib.request 
 
 from .resource_container import ResourceContainer
 from .sitemap import Sitemap
@@ -84,7 +84,7 @@ class ListBase(ResourceContainer):
         """
         if (uri is not None):
             try:
-                fh = URLopener().open(uri)
+                fh = urllib.request.urlopen(uri)
             except IOError as e:
                 raise Exception("Failed to load sitemap/sitemapindex from %s (%s)" % (uri,str(e)))
         elif (str is not None):
@@ -93,6 +93,7 @@ class ListBase(ResourceContainer):
             raise Exception("Nothing to parse")
         s = self.new_sitemap()
         s.parse_xml(fh=fh,resources=self,capability=self.capability_name,sitemapindex=False)
+        fh.close()
         self.parsed_index = s.parsed_index
         
     ##### OUTPUT #####

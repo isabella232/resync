@@ -111,8 +111,8 @@ class TestClient(unittest.TestCase):
         c.set_mappings( ['http://example.org/','resync/test/testdata/'] )
         with capture_stdout() as capturer:
             c.calculate_changelist(paths='resync/test/testdata/dir1', 
-                                   resource_sitemap='resync/test/testdata/examples_from_spec/resourcesync_ex_34.xml', 
-                                   changelist_sitemap='resync/test/testdata/examples_from_spec/resourcesync_cl_01.xml')
+                                   resource_sitemap='file://' + os.path.abspath('resync/test/testdata/examples_from_spec/resourcesync_ex_34.xml'), 
+                                   changelist_sitemap='file://' + os.path.abspath('resync/test/testdata/examples_from_spec/resourcesync_cl_01.xml'))
         sys.stderr.write('----------\n')
         sys.stderr.write(capturer.result)
         self.assertTrue( re.search(r'<rs:md capability="changelist"', capturer.result ) )

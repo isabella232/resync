@@ -242,6 +242,7 @@ class TestSitemap(unittest.TestCase):
         self.assertEqual( len(si.resources), 3, '3 sitemaps')
         sms = sorted(si.uris())
         self.assertEqual( sms, ['http://localhost:8888/sitemap00000.xml','http://localhost:8888/sitemap00001.xml','http://localhost:8888/sitemap00002.xml'] )
+        fh.close()
         #self.assertEqual( si.resources['http://localhost:8888/sitemap00000.xml'].lastmod, '2012-06-13T18:09:13Z' )
 
     def test_21_parse_multi_sitemapindex(self):
@@ -250,6 +251,7 @@ class TestSitemap(unittest.TestCase):
         si = s.parse_xml( fh=fh, sitemapindex=True )
         self.assertTrue( s.parsed_index, 'was a sitemapindex')
         self.assertEqual( len(si.resources), 3, '3 sitemaps listed')
+        fh.close()
 
     def test_30_parse_change_list(self):
         xml='<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n\

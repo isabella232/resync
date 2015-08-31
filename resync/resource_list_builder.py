@@ -173,7 +173,6 @@ class ResourceListBuilder():
         if (self.set_md5):
             # add md5
             r.md5=compute_md5_for_file(file)
-            self.logger.error(r.md5)
         if (self.set_length):
             # add length
             r.length=file_stat.st_size

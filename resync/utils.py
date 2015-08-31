@@ -64,4 +64,5 @@ def compute_md5_for_file(filename, block_size=2**14):
         if not data:
             break
         md5.update(data.encode('utf-8'))
+    f.close()
     return base64.b64encode(md5.digest()).decode('utf-8')
