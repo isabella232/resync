@@ -21,7 +21,7 @@ from resync.url_authority import UrlAuthority
 from resync.utils import compute_md5_for_file
 from resync.client_state import ClientState
 from resync.list_base_with_index import ListBaseIndexError
-from .w3c_datetime import str_to_datetime, datetime_to_str
+from resync.w3c_datetime import str_to_datetime, datetime_to_str
 
 
 class ClientFatalError(Exception):
