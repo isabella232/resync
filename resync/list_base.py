@@ -9,8 +9,8 @@ import io
 import logging
 import urllib.request
 
-from .resource_container import ResourceContainer
-from .sitemap import Sitemap
+from resync.resource_container import ResourceContainer
+from resync.sitemap import Sitemap
 
 
 class ListBase(ResourceContainer):
@@ -71,7 +71,7 @@ class ListBase(ResourceContainer):
         """
         self.parse(uri=uri)
 
-    def parse(self, uri=None, fh=None, str=None):
+    def parse(self, uri=None, fh=None, string=None):
         """Parse a single XML document for this list
 
         Accepts either a uri (uri or default if parameter not specified),
@@ -85,9 +85,9 @@ class ListBase(ResourceContainer):
             except IOError as e:
                 raise Exception(
                     "Failed to load sitemap/sitemapindex from %s (%s)"
-                    "" % (uri, str(e)))
-        elif (str is not None):
-            fh = io.StringIO(str)
+                    "" % (uri, string(e)))
+        elif (string is not None):
+            fh = io.StringIO(string)
         if (fh is None):
             raise Exception("Nothing to parse")
         s = self.new_sitemap()

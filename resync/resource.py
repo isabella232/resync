@@ -44,7 +44,7 @@ object that contains such information.
 
 from urllib.parse import urlparse
 from posixpath import basename
-from .w3c_datetime import str_to_datetime, datetime_to_str
+from resync.w3c_datetime import str_to_datetime, datetime_to_str
 
 
 class ChangeTypeError(Exception):

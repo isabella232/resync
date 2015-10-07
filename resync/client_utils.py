@@ -21,7 +21,6 @@ Copyright 2012,2013 Simeon Warner
 import logging
 
 from resync.client import ClientFatalError
-from resync.explorer import Explorer
 from resync.utils import UTCFormatter
 
 

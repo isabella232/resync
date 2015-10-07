@@ -11,7 +11,7 @@ Described in specification at:
 http://www.openarchives.org/rs/resourcesync#ChangeDumpManifest
 """
 
-from .change_list import ChangeList
+from resync.change_list import ChangeList
 
 
 class ChangeDumpManifest(ChangeList):

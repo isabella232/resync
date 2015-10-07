@@ -14,16 +14,12 @@ import os.path
 import datetime
 import distutils.dir_util
 import re
-import time
-import logging
 import requests
 
-from resync.mapper import Mapper
 from resync.sitemap import Sitemap
 from resync.client import Client, ClientFatalError
-from resync.client_state import ClientState
 from resync.resource import Resource
-from .w3c_datetime import str_to_datetime, datetime_to_str
+from resync.w3c_datetime import datetime_to_str
 
 
 class XResource(object):

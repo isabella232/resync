@@ -165,8 +165,7 @@ class Client(object):
         rlb = ResourceListBuilder(set_md5=self.checksum, mapper=self.mapper)
         dst_resource_list = rlb.from_disk()
         # 2. Compare these resource lists respecting any comparison options
-        (same, updated, deleted, created) = dst_resource_list.compare(
-                                                src_resource_list)
+        (same, updated, deleted, created) = dst_resource_list.compare(src_resource_list)
         # 3. Report status and planned actions
         self.log_status(in_sync=(len(updated) +
                                  len(deleted) + len(created) == 0),
@@ -472,8 +471,7 @@ class Client(object):
         s = Sitemap()
         self.logger.info("Reading sitemap(s) from %s ..." % (self.sitemap))
         try:
-            resource_container = s.parse_xml(
-                          urllib.request.urlopen(self.sitemap))
+            resource_container = s.parse_xml(urllib.request.urlopen(self.sitemap))
         except IOError as e:
             raise ClientFatalError("Cannot read document (%s)" % str(e))
         num_entries = len(resource_container.resources)
@@ -661,48 +659,6 @@ class Client(object):
                         check_str = ' EXPECTED %s' % (check_headers[header])
                 print("  %s: %s%s")
                 "" % (header, response.headers[header], check_str)
-
-    def calculate_changelist(self, paths=None, outfile=None,
-                             resource_sitemap=None, changelist_sitemap=None,
-                             links=None):
-        """ Build a ChangeList describing the updated/new files on local disk
-        Based on the combined set of the referenced ResourceList, ChangeList
-        and the local files.
-        """
-        # create fresh resourcelist, the combination of
-        old_rl = self.read_reference_resource_list(resource_sitemap)
-        cl = ChangeList()
-        cl.mapper = self.mapper
-        cl.read(uri=changelist_sitemap, index_only=(not self.allow_multifile))
-        for r in cl.resources:
-            if(r.change == 'deleted'):
-                old_rl.remove(r)
-            else:
-                r.change = None
-                old_rl.add(r, True)
-        combined_rl = old_rl
-        # update resourcelist
-        # Build a new Resource List from the files on local disk
-        new_rl = self.build_resource_list(paths=paths, set_path=None)
-        (_, updated, _, created) = combined_rl.compare(new_rl)
-        combined_rl.add(updated, True)
-        combined_rl.add(created, True)
-        # compare resourcelists
-        old_rl = self.read_reference_resource_list(resource_sitemap)
-        cl = ChangeList(ln=links)
-        (_, updated, deleted, created) = old_rl.compare(combined_rl)
-        cl.add_changed_resources(updated, change='updated')
-        cl.add_changed_resources(deleted, change='deleted')
-        cl.add_changed_resources(created, change='created')
-        # 4. Write out change list
-        cl.mapper = self.mapper
-        cl.pretty_xml = self.pretty_xml
-        if (self.max_sitemap_entries is not None):
-            cl.max_sitemap_entries = self.max_sitemap_entries
-        if (outfile is None):
-            print(cl.as_xml())
-        else:
-            cl.write(basename=outfile)
 
     def write_resource_list(self, paths=None, outfile=None,
                             links=None, dump=None):

@@ -19,10 +19,7 @@ http://www.openarchives.org/rs/resourcesync#DescResources
 
 import collections
 
-from .list_base_with_index import ListBaseWithIndex
-from .sitemap import Sitemap
-from .mapper import Mapper, MapperError
-from .url_authority import UrlAuthority
+from resync.list_base_with_index import ListBaseWithIndex
 
 
 class ResourceListDict(dict):

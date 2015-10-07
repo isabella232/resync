@@ -21,7 +21,8 @@ import optparse
 import sys
 
 from resync import __version__
-from resync.client import Client, ClientFatalError
+from resync_publisher.ehri_client import ResourceSyncPublisherClient
+from resync.client import ClientFatalError
 from resync.client_utils import init_logging, count_true_args, parse_links, parse_capabilities, parse_capability_lists
 
 DEFAULT_LOGFILE = 'resync-client.log'
@@ -128,7 +129,7 @@ def main():
                         "to the Capability List at the URI given")
 
     # Options that apply to multiple modes
-    opt = p.add_option_group('MISCELANEOUS OPTIONS')
+    opt = p.add_option_group('MISCELLANEOUS OPTIONS')
     opt.add_option('--checksum', action='store_true',
                    help="use checksum (md5) in addition to last modification time and size")
     opt.add_option('--delete', action='store_true',
@@ -200,9 +201,7 @@ def main():
     init_logging(to_file=values.logger, logfile=values.logfile, default_logfile=DEFAULT_LOGFILE,
                  verbose=values.verbose, eval_mode=values.eval)
 
-    c = Client(checksum=values.checksum,
-               verbose=values.verbose,
-               dryrun=values.dryrun)
+    c = ResourceSyncPublisherClient(checksum=values.checksum, verbose=values.verbose, dryrun=values.dryrun)
 
     try:
         if (args):
@@ -256,7 +255,7 @@ def main():
         elif (values.calculatechangelist):
             c.calculate_changelist(paths=values.paths,
                                    outfile=values.outfile,
-                                   resourcelist_sitemap=values.reference,
+                                   resource_sitemap=values.reference,
                                    changelist_sitemap=values.newreference,
                                    links=links)
         elif (values.resourcelist or values.resourcedump):

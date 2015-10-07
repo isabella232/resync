@@ -118,8 +118,7 @@ class Mapper():
         In the case that uri is already a local path then the same path
         is returned.
         """
-        (scheme, netloc, path, params, query,
-         fragment) = urllib.parse.urlparse(uri)
+        (scheme, netloc, path, params, query, fragment) = urllib.parse.urlparse(uri)
         if (netloc == ''):
             return(uri)
         path = '/'.join([netloc, path])
@@ -164,9 +163,11 @@ class Map:
         success, None on failure.
         """
         m = re.match(self.dst_path + "/(.*)$", dst_file)
+        print(self.dst_path + "/(.*)$ - " + dst_file)
         if (m is None):
             return(None)
         rel_path = m.group(1)
+        print('src_uri:'+self.src_uri)
         return(self.src_uri + '/' + rel_path)
 
     def src_to_dst(self, src_uri):

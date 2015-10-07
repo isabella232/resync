@@ -18,11 +18,10 @@ import os.path
 import re
 import logging
 
-from .resource import Resource
-from .resource_list import ResourceList
-from .sitemap import Sitemap
-from .utils import compute_md5_for_file
-from .w3c_datetime import datetime_to_str
+from resync.resource import Resource
+from resync.resource_list import ResourceList
+from resync.utils import compute_md5_for_file
+from resync.w3c_datetime import datetime_to_str
 
 
 class ResourceListBuilder():
@@ -137,7 +136,7 @@ class ResourceListBuilder():
                             "ResourceListBuilder.from_disk_add_path: "
                             "%d files..." % (num_files))
                     self.add_file(resource_list=resource_list,
-                                  dir=dirpath, file=file_in_dirpath)
+                                  resource_dir=dirpath, file=file_in_dirpath)
                     # prune list of dirs based on self.exclude_dirs
                     for exclude in self.exclude_dirs:
                         if exclude in dirs:
@@ -147,7 +146,7 @@ class ResourceListBuilder():
             # single file
             self.add_file(resource_list=resource_list, file=path)
 
-    def add_file(self, resource_list=None, dir=None, file=None):
+    def add_file(self, resource_list=None, resource_dir=None, file=None):
         """Add a single file to resource_list
 
         Follows object settings of set_path, set_md5 and set_length.
@@ -157,8 +156,8 @@ class ResourceListBuilder():
                 self.logger.debug("Excluding file %s" % (file))
                 return
             # get abs filename and also URL
-            if (dir is not None):
-                file = os.path.join(dir, file)
+            if (resource_dir is not None):
+                file = os.path.join(resource_dir, file)
             if (not os.path.isfile(file) or not
                     (self.include_symlinks or not os.path.islink(file))):
                 return

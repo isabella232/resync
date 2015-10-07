@@ -75,9 +75,7 @@ class TestClient(unittest.TestCase):
             capturer.result))
 
     def getUri(self, filename):
-        return 'file://' + \
-                os.path.abspath(
-                    'resync/test/testdata/examples_from_spec/'+filename)
+        return 'file://' + os.path.abspath('resync/test/testdata/examples_from_spec/' + filename)
 
     def test20_parse_document(self):
         # Key property of the parse_document() method is that it parses the
@@ -149,33 +147,8 @@ class TestClient(unittest.TestCase):
                       capturer.result))
         # Travis CI does not preserve timestamps from github so test here for
         # the file size but not the datestamp
-        #self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_a</loc><lastmod>[\w\-:]+</lastmod><rs:md length="20" /></url>', capturer.result ) )
-        #self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_b</loc><lastmod>[\w\-:]+</lastmod><rs:md length="45" /></url>', capturer.result ) )
-
-    def test50_update_resource_list(self):
-        c = Client()
-        c.set_mappings(['http://example.org/', 'resync/test/testdata/'])
-        with capture_stdout() as capturer:
-            c.calculate_changelist(
-                paths='resync/test/testdata/dir1',
-                resource_sitemap=self.getUri('resourcesync_ex_34.xml'),
-                changelist_sitemap=self.getUri('resourcesync_cl_01.xml'))
-        sys.stderr.write('----------\n')
-        sys.stderr.write(capturer.result)
-        self.assertTrue(
-            re.search(r'<rs:md capability="changelist"', capturer.result))
-        self.assertTrue(
-            re.search(r'<url><loc>http://example.org/dir1/file_a</loc>',
-                      capturer.result))
-        self.assertTrue(
-            re.search(r'<url><loc>http://example.org/dir1/file_b</loc>',
-                      capturer.result))
-        self.assertTrue(
-            re.search(r'<url><loc>http://example.com/res1.html</loc>',
-                      capturer.result))
-        self.assertTrue(
-            re.search(r'<url><loc>http://example.com/res2.pdf</loc>',
-                      capturer.result))
+        # self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_a</loc><lastmod>[\w\-:]+</lastmod><rs:md length="20" /></url>', capturer.result ) )
+        # self.assertTrue( re.search(r'<url><loc>http://example.org/dir1/file_b</loc><lastmod>[\w\-:]+</lastmod><rs:md length="45" /></url>', capturer.result ) )
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClient)

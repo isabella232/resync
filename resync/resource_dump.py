@@ -9,7 +9,7 @@ Described in specification at:
 http://www.openarchives.org/rs/resourcesync#ResourceDump
 """
 
-from .resource_list import ResourceList
+from resync.resource_list import ResourceList
 
 
 class ResourceDump(ResourceList):

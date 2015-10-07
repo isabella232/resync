@@ -18,9 +18,8 @@ particular resource.
 import collections
 
 
-from .list_base_with_index import ListBaseWithIndex
-from .resource import Resource, ChangeTypeError
-from .sitemap import Sitemap
+from resync.list_base_with_index import ListBaseWithIndex
+from resync.resource import Resource, ChangeTypeError
 
 
 class ChangeList(ListBaseWithIndex):
@@ -28,10 +27,7 @@ class ChangeList(ListBaseWithIndex):
 
     def __init__(self, resources=None, md=None, ln=None, uri=None,
                  mapper=None, resources_class=list):
-        super(ChangeList, self).__init__(
-                  resources=resources, md=md, ln=ln, uri=uri,
-                  capability_name='changelist', mapper=mapper,
-                  resources_class=resources_class)
+        super(ChangeList, self).__init__(resources=resources, md=md, ln=ln, uri=uri, capability_name='changelist', mapper=mapper, resources_class=resources_class)
 
     def add_if_changed(self, resource):
         """Add resource if change is not None else ChangeTypeError"""

@@ -6,8 +6,8 @@ import logging
 from xml.etree.ElementTree import ElementTree, Element, parse, tostring
 import io
 
-from .resource import Resource
-from .resource_container import ResourceContainer
+from resync.resource import Resource
+from resync.resource_container import ResourceContainer
 
 SITEMAP_NS = 'http://www.sitemaps.org/schemas/sitemap/0.9'
 RS_NS = 'http://www.openarchives.org/rs/terms/'
@@ -213,9 +213,7 @@ class Sitemap(object):
                         "Expected to read a %s document, but no capability "
                         "specified in sitemap" % (capability))
             if (resources.md['capability'] != capability):
-                raise SitemapParseError(
-                        "Expected to read a %s document, got %s"
-                        "" % (capability, resources.md['capability']))
+                raise SitemapParseError("Expected to read a %s document, got %s" % (capability, resources.md['capability']))
         # return the resource container object
         return(resources)
 

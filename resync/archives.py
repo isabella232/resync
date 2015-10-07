@@ -8,7 +8,7 @@ same for the Resource List Archive, Change List Archive,
 Resource Dump Archive, and Change Dump Archive.
 """
 
-from .list_base_with_index import ListBaseWithIndex
+from resync.list_base_with_index import ListBaseWithIndex
 
 
 

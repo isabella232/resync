@@ -10,12 +10,11 @@ import urllib.request
 import re
 import itertools
 
-from .list_base import ListBase
-from .resource import Resource
-from .sitemap import Sitemap
-from .mapper import Mapper, MapperError
-from .url_authority import UrlAuthority
-from .utils import compute_md5_for_file
+from resync.list_base import ListBase
+from resync.resource import Resource
+from resync.mapper import MapperError
+from resync.url_authority import UrlAuthority
+from resync.utils import compute_md5_for_file
 
 
 class ListBaseIndexError(Exception):
@@ -332,8 +331,7 @@ class ListBaseWithIndex(ListBase):
                              md5=compute_md5_for_file(file))
                 index.add(r)
                 # Get next chunk
-                (chunk, nextresource) = self.get_resources_chunk(
-                                            resources_iter, nextresource)
+                (chunk, nextresource) = self.get_resources_chunk(resources_iter, nextresource)
             self.logger.info("Wrote %d sitemaps" % (len(index)))
             f = open(basename, 'w')
             self.logger.info("Writing sitemapindex %s..." % (basename))

@@ -7,10 +7,9 @@ and links like other lists.
 
 import collections
 
-from .resource import Resource
-from .resource_set import ResourceSet
-from .list_base import ListBase
-from .sitemap import Sitemap
+from resync.resource import Resource
+from resync.resource_set import ResourceSet
+from resync.list_base import ListBase
 
 
 class CapabilitySet(ResourceSet):
@@ -75,9 +74,7 @@ class CapabilityList(ListBase):
     def __init__(self, resources=None, md=None, ln=None, uri=None):
         if (resources is None):
             resources = CapabilitySet()
-        super(CapabilityList, self).__init__(
-                  resources=resources, md=md, ln=ln, uri=uri,
-                  capability_name='capabilitylist')
+        super(CapabilityList, self).__init__(resources=resources, md=md, ln=ln, uri=uri, capability_name='capabilitylist')
 
     def add(self, resource, replace=False):
         """Add a resource or an iterable collection of resources
@@ -114,7 +111,7 @@ class CapabilityList(ListBase):
     def capability_info(self, name=None):
         """Return information about the requested capability from this list
 
-        Will return None if there is no information about 
+        Will return None if there is no information about
         the requested capability
         """
         for r in self.resources:
