@@ -21,28 +21,29 @@ import optparse
 import sys
 
 from resync import __version__
-from resync.client import Client, ClientFatalError
-from resync.client_utils import init_logging,count_true_args,parse_links,parse_capabilities,parse_capability_lists
-from resync.utils import UTCFormatter
+from resync_publisher.ehri_client import ResourceSyncPublisherClient
+from resync.client import ClientFatalError
+from resync.client_utils import init_logging, count_true_args, parse_links, parse_capabilities, parse_capability_lists
 
 DEFAULT_LOGFILE = 'resync-client.log'
 
+
 def main():
 
-    if (sys.version_info < (2,6)):
+    if (sys.version_info < (2, 6)):
         sys.exit("This program requires python version 2.6 or later")
-    
+
     # Options and arguments
     p = optparse.OptionParser(description='ResourceSync command line client',
                               usage='usage: %prog [options] uri_path local_path  (-h for help)',
-                              version='%prog '+__version__ )
+                              version='%prog ' + __version__)
 
     # Modes
     # a. modes using remote sitemap/resources
     rem = p.add_option_group('REMOTE MODES',
-        'These modes use a remote source that is specified in a set of uri=path mappings '
-        'and potentially also using an explicit --sitemap location. The default mode is '
-        '--baseline')
+                             'These modes use a remote source that is specified in a set of uri=path mappings '
+                             'and potentially also using an explicit --sitemap location. The default mode is '
+                             '--baseline')
     rem.add_option('--baseline', '-b', action='store_true',
                    help='baseline sync of resources from remote source (src) to local filesystem (dst)')
     rem.add_option('--incremental', '--inc', '-i', action='store_true',
@@ -51,14 +52,21 @@ def main():
                    help="audit sync state of destination wrt source")
     rem.add_option('--parse', '-p', action='store_true',
                    help="parse a remote sitemap/sitemapindex (from mapping or explicit --sitemap) and show summary information including document type and number of entries")
-    rem.add_option('--explore','-x', action='store_true',
+    rem.add_option('--explore', '-x', action='store_true',
                    help="read discovery information and show capabilities. Will use either an explicit --sitemap or the first mapping URI specified to determine which server to look for .well-known discovery information or which URI to try")
     # b. modes based solely on files on local disk
     loc = p.add_option_group('LOCAL MODES',
-        'These modes act on files on the local disk')
+                             'These modes act on files on the local disk')
     loc.add_option('--resourcelist', '--resource-list', '-r', action='store_true',
                    help="write a resource list based on files on disk using uri=path mappings "
                         "in reverse to calculate URIs from the local paths. Scans local disk "
+                        "based either on explicit --paths setting, else starting from all local "
+                        "paths specified in the mappings. Writes to STDOUT by default, override "
+                        "with --outfile")
+    loc.add_option('--calculatechangelist', '--new-resource-list', action='store_true',
+                   help="write a resource list based on new/updated files on disk using uri=path mappings "
+                        "in reverse. Scans local disk and combines with --reference (the resourcelist) and "
+                        "--newreference (the changelist) to create a new changelist "
                         "based either on explicit --paths setting, else starting from all local "
                         "paths specified in the mappings. Writes to STDOUT by default, override "
                         "with --outfile")
@@ -83,7 +91,8 @@ def main():
                    help="write a Resource Dump. Specify output file with --outfile and use other "
                         "options as for --changelist")
 
-    # Specification of map between remote URI and local file paths, and remote sitemap
+    # Specification of map between remote URI and local file paths, and remote
+    # sitemap
     nam = p.add_option_group('FILE/URI NAMING OPTIONS')
     nam.add_option('--outfile', type=str, action='store',
                    help="write output to specified file rather than STDOUT or default")
@@ -97,7 +106,7 @@ def main():
                    help="reference sitemap name for --changelist calculation")
     nam.add_option('--newreference', type=str, action='store',
                    help="updated reference sitemap name for --changelist calculation")
-    nam.add_option('--changelist-uri','--change-list-uri', type=str, action='store',
+    nam.add_option('--changelist-uri', '--change-list-uri', type=str, action='store',
                    help="explicitly set the changelist URI that will be use in --inc mode, "
                         "overrides process of getting this from the sitemap")
 
@@ -108,19 +117,19 @@ def main():
                         "(repeat option for multiple links)")
     lks.add_option('--describedby-link', type=str, action='store',
                    help="add an <rs:md rel=\"describedby\" link to "
-                        "a description of the feed at the URI given") 
-    lks.add_option('--sourcedescription-link', '--source-description-link', 
+                        "a description of the feed at the URI given")
+    lks.add_option('--sourcedescription-link', '--source-description-link',
                    type=str, action='store',
                    help="for a Capability List add a <rs:md rel=\"up\" link to the"
-                        "Source Description document at the URI given, else ignored") 
+                        "Source Description document at the URI given, else ignored")
     lks.add_option('--capabilitylist-link', '--capability-list-link',
                    type=str, action='store',
                    help="for all documents except a Capability List or a "
                         "Source Description, add an <rs:md rel=\"up\" link "
-                        "to the Capability List at the URI given") 
+                        "to the Capability List at the URI given")
 
     # Options that apply to multiple modes
-    opt = p.add_option_group('MISCELANEOUS OPTIONS')
+    opt = p.add_option_group('MISCELLANEOUS OPTIONS')
     opt.add_option('--checksum', action='store_true',
                    help="use checksum (md5) in addition to last modification time and size")
     opt.add_option('--delete', action='store_true',
@@ -167,111 +176,119 @@ def main():
                    help="output evaluation of source/client synchronization performance... "
                         "be warned, this is very verbose")
 
-    (args, map) = p.parse_args()
+    (values, args) = p.parse_args()
 
     # Implement exclusive arguments and default --baseline (support for exclusive
     # groups in argparse is incomplete is python2.6)
-    if (not args.baseline and not args.incremental and not args.audit and 
-        not args.parse and not args.explore and
-        not args.resourcelist and not args.changelist and
-        not args.capabilitylist and not args.sourcedescription and
-        not args.resourcedump and not args.changedump):
-        if (len(map)==0):
-            # No args at all, show help
+    if (not values.baseline and not values.incremental and not values.audit and
+            not values.parse and not values.explore and
+            not values.resourcelist and not values.changelist and
+            not values.calculatechangelist and
+            not values.capabilitylist and not values.sourcedescription and
+            not values.resourcedump and not values.changedump):
+        if (len(args) == 0):
+            # No values at all, show help
             p.print_help()
             return
         else:
-            args.baseline=True
-    elif (count_true_args(args.baseline,args.incremental,args.audit,args.parse,args.explore,
-                          args.resourcelist,args.changelist,args.capabilitylist,
-                          args.sourcedescription,args.resourcedump,args.changedump)>1):
+            values.baseline = True
+    elif (count_true_args(values.baseline, values.incremental, values.audit, values.parse, values.explore,
+                          values.resourcelist, values.changelist, values.capabilitylist,
+                          values.sourcedescription, values.resourcedump, values.changedump) > 1):
         p.error("Only one of --baseline, --incremental, --audit, --parse, --explore, --resourcelist, --changelist, --capabilitylist, --sourcedescription, --resourcedump, --changedump modes allowed")
 
     # Configure logging module and create logger instance
-    init_logging( to_file=args.logger, logfile=args.logfile, default_logfile=DEFAULT_LOGFILE, 
-                  verbose=args.verbose, eval_mode=args.eval )
+    init_logging(to_file=values.logger, logfile=values.logfile, default_logfile=DEFAULT_LOGFILE,
+                 verbose=values.verbose, eval_mode=values.eval)
 
-    c = Client( checksum=args.checksum,
-                verbose=args.verbose,
-                dryrun=args.dryrun )
+    c = ResourceSyncPublisherClient(checksum=values.checksum, verbose=values.verbose, dryrun=values.dryrun)
 
     try:
-        if (map):
+        if (args):
             # Mappings apply to (almost) everything
-            c.set_mappings(map)
-        if (args.sitemap):
-            c.sitemap_name=args.sitemap
-        if (args.warc):
-            c.dump_format='warc'
-        if (args.exclude):
-            c.exclude_patterns=args.exclude
-        if (args.multifile):
-            c.allow_multifile=not args.multifile
-        if (args.noauth):
-            c.noauth=args.noauth
-        if (args.strictauth):
-            c.strictauth=args.strictauth
-        if (args.max_sitemap_entries):
-            c.max_sitemap_entries=args.max_sitemap_entries
-        if (args.ignore_failures):
-            c.ignore_failures=args.ignore_failures
+            c.set_mappings(args)
+        if (values.sitemap):
+            c.sitemap_name = values.sitemap
+        if (values.warc):
+            c.dump_format = 'warc'
+        if (values.exclude):
+            c.exclude_patterns = values.exclude
+        if (values.multifile):
+            c.allow_multifile = not values.multifile
+        if (values.noauth):
+            c.noauth = values.noauth
+        if (values.strictauth):
+            c.strictauth = values.strictauth
+        if (values.max_sitemap_entries):
+            c.max_sitemap_entries = values.max_sitemap_entries
+        if (values.ignore_failures):
+            c.ignore_failures = values.ignore_failures
 
         # Links apply to anything that writes sitemaps
-        links = parse_links(args.link)
+        links = parse_links(values.link)
         # Add specific links is appropriate cases
-        if (args.capabilitylist_link and 
-            not args.capabilitylist and
-            not args.sourcedescription):
-            # rel="up" to Capability List in all but Capability List 
+        if (values.capabilitylist_link and
+                not values.capabilitylist and
+                not values.sourcedescription):
+            # rel="up" to Capability List in all but Capability List
             # and Source Description
-            links.insert(0,{'rel':'up','href':args.capabilitylist_link})
-        if (args.sourcedescription_link and args.capabilitylist):
+            links.insert(0, {'rel': 'up', 'href': values.capabilitylist_link})
+        if (values.sourcedescription_link and values.capabilitylist):
             # rel="up" to Source Description from Capability List
-            links.insert(0,{'rel':'up','href':args.sourcedescription_link})
-        if (args.describedby_link):
-            links.insert(0,{'rel':'describedby','href':args.describedby_link})
-
+            links.insert(0, {'rel': 'up', 'href': values.sourcedescription_link})
+        if (values.describedby_link):
+            links.insert(0, {'rel': 'describedby',
+                             'href': values.describedby_link})
 
         # Finally, do something...
-        if (args.baseline or args.audit):
-            c.baseline_or_audit(allow_deletion=args.delete,
-                                audit_only=args.audit)
-        elif (args.incremental):
-            c.incremental(allow_deletion=args.delete,
-                          change_list_uri=args.changelist_uri,
-                          from_datetime=args.from_datetime)
-        elif (args.parse):
+        if (values.baseline or values.audit):
+            c.baseline_or_audit(allow_deletion=values.delete,
+                                audit_only=values.audit)
+        elif (values.incremental):
+            c.incremental(allow_deletion=values.delete,
+                          change_list_uri=values.changelist_uri,
+                          from_datetime=values.from_datetime)
+        elif (values.parse):
             c.parse_document()
-        elif (args.explore):
+        elif (values.explore):
             c.explore()
-        elif (args.resourcelist or args.resourcedump):
-            c.write_resource_list(paths=args.paths,
-                                  outfile=args.outfile,
+        elif (values.calculatechangelist):
+            c.calculate_changelist(paths=values.paths,
+                                   outfile=values.outfile,
+                                   resource_sitemap=values.reference,
+                                   changelist_sitemap=values.newreference,
+                                   links=links)
+        elif (values.resourcelist or values.resourcedump):
+            c.write_resource_list(paths=values.paths,
+                                  outfile=values.outfile,
                                   links=links,
-                                  dump=args.resourcedump)
-        elif (args.changelist or args.changedump):
-            if (not args.reference and not args.empty):
-                p.error("Must supply --reference sitemap for --changelist, or --empty")
-            c.write_change_list(ref_sitemap=args.reference,
-                                newref_sitemap=( args.newreference if (args.newreference) else None ),
-                                empty=args.empty,
-                                paths=args.paths,
-                                outfile=args.outfile,
+                                  dump=values.resourcedump)
+        elif (values.changelist or values.changedump):
+            if (not values.reference and not values.empty):
+                p.error(
+                    "Must supply --reference sitemap for --changelist, or --empty")
+            c.write_change_list(ref_sitemap=values.reference,
+                                newref_sitemap=(values.newreference if (
+                                    values.newreference) else None),
+                                empty=values.empty,
+                                paths=values.paths,
+                                outfile=values.outfile,
                                 links=links,
-                                dump=args.changedump)
-        elif (args.capabilitylist):
+                                dump=values.changedump)
+        elif (values.capabilitylist):
             c.write_capability_list(
-                capabilities=parse_capabilities(args.capabilitylist),
-                outfile=args.outfile,
+                capabilities=parse_capabilities(values.capabilitylist),
+                outfile=values.outfile,
                 links=links)
-        elif (args.sourcedescription):
+        elif (values.sourcedescription):
             c.write_source_description(
-                capability_lists=parse_capability_lists(args.sourcedescription),
-                outfile=args.outfile,
+                capability_lists=parse_capability_lists(
+                    values.sourcedescription),
+                outfile=values.outfile,
                 links=links)
         else:
             p.error("Unknown mode requested")
-    # Any problem we expect will come as a ClientFatalError, anything else 
+    # Any problem we expect will come as a ClientFatalError, anything else
     # is... an exception ;-)
     except ClientFatalError as e:
         sys.stderr.write("\nFatalError: " + str(e) + "\n")
