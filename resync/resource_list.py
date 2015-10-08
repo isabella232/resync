@@ -145,7 +145,9 @@ class ResourceList(ListBaseWithIndex):
                                            resources_class=resources_class)
 
     def remove(self, resource):
-        self.resources.remove(resource)
+        if isinstance(resource, collections.Iterable):
+            for r in resource:
+                self.resources.remove(r)
 
     def add(self, resource, replace=False):
         """Add a resource or an iterable collection of resources
