@@ -45,6 +45,7 @@ class Client(object):
         self.verbose = verbose
         self.dryrun = dryrun
         self.logger = logging.getLogger('resync.client')
+        self.logger.setLevel(10)
         self.mapper = Mapper()
         self.resource_list_name = 'resourcelist.xml'
         self.change_list_name = 'changelist.xml'
@@ -201,7 +202,7 @@ class Client(object):
         for resource in updated:
             uri = resource.uri
             filename = self.mapper.src_to_dst(uri)
-            self.logger.info("updated: %s -> %s" % (uri, filename))
+            self.logger.warning("updated: %s -> %s" % (uri, filename))
             num_updated += self.update_resource(resource, filename, 'updated')
         for resource in deleted:
             uri = resource.uri
@@ -413,7 +414,9 @@ class Client(object):
             self.log_event(Resource(resource=resource, change=change))
             # 3. sanity check
             length = os.stat(filename).st_size
-            if (resource.length != length):
+            if (resource.length is None):
+                self.logger.warning("Caught flying None: " + str(resource))
+            elif (resource.length != length):
                 self.logger.info("Downloaded size for %s of %d bytes does not "
                                  "match expected %d bytes"
                                  % (resource.uri, length, resource.length))

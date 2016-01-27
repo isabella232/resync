@@ -7,6 +7,7 @@ of the last change seen.
 
 import re
 import configparser
+import os
 
 
 class ClientState(object):
@@ -21,6 +22,8 @@ class ClientState(object):
 
         FIXME - should have some file lock to avoid race
         """
+        #print(os.path.realpath(self.status_file))
+
         parser = configparser.SafeConfigParser()
         parser.read(self.status_file)
         status_section = 'incremental'
@@ -32,7 +35,7 @@ class ClientState(object):
         else:
             parser.set(status_section, self.config_site_to_name(
                 site), str(timestamp))
-        with open(self.status_file, 'wb') as configfile:
+        with open(self.status_file, 'w') as configfile:
             parser.write(configfile)
             configfile.close()
 
