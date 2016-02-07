@@ -188,7 +188,7 @@ class Client(object):
         # 5. Grab files to do sync
         delete_msg = (", and delete %d resources" %
                       len(deleted)) if (allow_deletion) else ''
-        self.logger.warning("Will GET %d resources%s" %
+        self.logger.info("Will GET %d resources%s" %
                             (len(created) + len(updated), delete_msg))
         self.last_timestamp = 0
         num_created = 0
@@ -826,10 +826,10 @@ class Client(object):
             else:
                 status = "CHANGES APPLIED" if incremental else "SYNCED"
         same = "" if (same is None) else ("same=%d, " % same)
-        self.logger.warning("Status: %15s (%s%s=%d, %s=%d, %s=%d)" %
+        self.logger.info("Status: %15s (%s%s=%d, %s=%d, %s=%d)" %
                             (status, same, words['created'], created,
                              words['updated'], updated, words['deleted'],
                              deleted))
 
 if __name__ == '__main__':
-    main()
+    main() # no main() method in here

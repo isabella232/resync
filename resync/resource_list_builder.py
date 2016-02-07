@@ -112,7 +112,7 @@ class ResourceListBuilder():
             resource_list.md_at = datetime_to_str()
         # Run for each map in the mappings
         for path in paths:
-            self.logger.warning("Scanning disk from %s" % (path))
+            self.logger.info("Scanning disk from %s" % (path))
             self.from_disk_add_path(path=path, resource_list=resource_list)
         # Set end time
         resource_list.md_completed = datetime_to_str()
