@@ -5,6 +5,7 @@ util.py: A collection of common util functions used in source and/or client.
 
 import base64
 import hashlib
+from functools import partial
 from logging import Formatter
 from datetime import datetime
 
@@ -45,6 +46,12 @@ base64.b64encode() with no altchars specified. Available in python2.4 and
 up [http://docs.python.org/library/base64.html]
 """
 
+"""
+
+   The Content-MD5 header field has been removed because it was
+   inconsistently implemented with respect to partial responses.
+   http://tools.ietf.org/html/rfc7231#appendix-B [Page 92]
+"""
 
 def compute_md5_for_string(string):
     """Compute MD5 digest over some string payload"""
@@ -52,7 +59,8 @@ def compute_md5_for_string(string):
             string.encode('utf-8')).digest()).decode('utf-8')
 
 
-def compute_md5_for_file(filename, block_size=2**14):
+# can only read utf-8 encoded files.
+def old_compute_md5_for_file(filename, block_size=2**14):
     """Compute MD5 digest for a file
 
     Optional block_size parameter controls memory used to do MD5 calculation.
@@ -67,3 +75,16 @@ def compute_md5_for_file(filename, block_size=2**14):
         md5.update(data.encode('utf-8'))
     f.close()
     return base64.b64encode(md5.digest()).decode('utf-8')
+
+def compute_md5_for_file(filename, block_size=2**14):
+    """Compute MD5 digest for a file
+
+    Optional block_size parameter controls memory used to do MD5 calculation.
+    This should be a multiple of 128 bytes.
+    """
+    with open(filename, mode='rb') as f:
+        d = hashlib.md5()
+        for buf in iter(partial(f.read, block_size), b''):
+            d.update(buf)
+
+    return base64.b64encode(d.digest()).decode('utf-8')

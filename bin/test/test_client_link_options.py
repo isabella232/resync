@@ -1,6 +1,6 @@
 import sys
 import unittest
-import StringIO
+from io import StringIO
 
 sys.path.insert(0, '.')
 
@@ -23,7 +23,7 @@ class TestClientLinkOptions(unittest.TestCase):
         xml = run_resync(['--resourcelist',
                           'http://example.org/t','resync/test/testdata/dir1'])
         rl = ResourceList()
-        rl.parse(fh=StringIO.StringIO(xml))
+        rl.parse(fh=StringIO(xml))
         self.assertEqual( len(rl), 2 )
         self.assertEqual( rl.link('describedby'), None )
 
@@ -34,7 +34,7 @@ class TestClientLinkOptions(unittest.TestCase):
                           '--capabilitylist-link=c',
                           'http://example.org/t','resync/test/testdata/dir1'])
         rl = ResourceList()
-        rl.parse(fh=StringIO.StringIO(xml))
+        rl.parse(fh=StringIO(xml))
         self.assertEqual( len(rl), 2 )
         self.assertNotEqual( rl.link('describedby'), None )
         self.assertEqual( rl.link('describedby')['href'], 'a' )
@@ -47,7 +47,7 @@ class TestClientLinkOptions(unittest.TestCase):
                           '--sourcedescription-link=b',
                           '--capabilitylist-link=c' ]) #will be ignored
         capl = CapabilityList()
-        capl.parse(fh=StringIO.StringIO(xml))
+        capl.parse(fh=StringIO(xml))
         self.assertEqual( len(capl), 2 )
         self.assertNotEqual( capl.link('describedby'), None )
         self.assertEqual( capl.link('describedby')['href'], 'a' )
