@@ -108,6 +108,7 @@ class Sitemap(object):
         if (sys.version_info < (2, 7)):
             tree.write(fh, encoding='UTF-8')
         else:
+            self.logger.debug("resources_as_xml with encoding=unicode")
             tree.write(fh, encoding='unicode',
                        xml_declaration=True, method='xml')
         if (xml_buf is not None):
@@ -263,6 +264,7 @@ class Sitemap(object):
             # must not specify method='xml' in python2.6
             return(tostring(e, encoding='UTF-8'))
         else:
+            self.logger.debug("resource_as_xml with encoding=unicode")
             return("<?xml version='1.0' encoding='UTF-8'?>\n" +
                    tostring(e, encoding='unicode', method='xml'))
 

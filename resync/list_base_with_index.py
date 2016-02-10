@@ -339,7 +339,8 @@ class ListBaseWithIndex(ListBase):
             f.close()
             self.logger.info("Wrote sitemapindex %s" % (basename))
         else:
-            f = open(basename, 'w')
+            self.logger.debug("Open file with encoding UTF-8")
+            f = open(basename, 'w', encoding="UTF-8")
             self.logger.info("Writing sitemap %s..." % (basename))
             s.resources_as_xml(chunk, fh=f)
             f.close()

@@ -6,9 +6,12 @@ Created on 24 sep. 2015
 
 @author: linda
 '''
+
+import logging, os.path, urllib.parse
 from resync.client import Client
 from resync.change_list import ChangeList
 
+logger = logging.getLogger(__name__)
 
 class ResourceSyncPublisherClient(Client):
     '''
@@ -29,6 +32,33 @@ class ResourceSyncPublisherClient(Client):
         and the local files.
         """
         # create fresh resourcelist, the combination of
+
+        # When we start with a fresh directory, there will be no resource_sitemap. Just create an empty xml file
+        # to get things started
+        if not os.path.exists(resource_sitemap):
+            p = urllib.parse.urlparse(resource_sitemap)
+            finalPath = os.path.abspath(os.path.join(p.netloc, p.path))
+            logger.debug("Writing empty resourcelist as %s", finalPath)
+            with open(finalPath, mode='w', encoding='utf-8') as file:
+                file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+                file.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">\n')
+                file.write('<rs:md capability="resourcelist" />\n')
+                file.write('</urlset>')
+                file.close()
+
+        # Same for changelist_sitemap
+        if not os.path.exists(changelist_sitemap):
+            p = urllib.parse.urlparse(changelist_sitemap)
+            finalPath = os.path.abspath(os.path.join(p.netloc, p.path))
+            logger.debug("Writing empty changelist as %s", finalPath)
+            with open(finalPath, mode='w', encoding='utf-8') as file:
+                file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+                file.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">\n')
+                file.write('<rs:md capability="changelist" />\n')
+                file.write('</urlset>')
+                file.close()
+
+
         old_rl = self.read_reference_resource_list(resource_sitemap)
         cl = ChangeList()
         cl.mapper = self.mapper

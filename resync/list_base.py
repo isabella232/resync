@@ -114,7 +114,8 @@ class ListBase(ResourceContainer):
         Must be overridden to support multi-file lists.
         """
         self.default_capability()
-        fh = open(basename, 'w')
+        self.logger.debug("Open file with encoding UTF-8")
+        fh = open(basename, 'w', encoding="UTF-8")
         s = self.new_sitemap()
         s.resources_as_xml(self, fh=fh, sitemapindex=self.sitemapindex)
         fh.close()
