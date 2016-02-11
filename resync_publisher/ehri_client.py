@@ -37,9 +37,9 @@ class ResourceSyncPublisherClient(Client):
         # to get things started
         if not os.path.exists(resource_sitemap):
             p = urllib.parse.urlparse(resource_sitemap)
-            finalPath = os.path.abspath(os.path.join(p.netloc, p.path))
-            logger.debug("Writing empty resourcelist as %s", finalPath)
-            with open(finalPath, mode='w', encoding='utf-8') as file:
+            logger.debug("creating empty resourcelist. path = %s", p.path)
+            #finalPath = os.path.abspath(os.path.join(p.netloc, p.path))
+            with open(p.path, mode='w', encoding='utf-8') as file:
                 file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
                 file.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">\n')
                 file.write('<rs:md capability="resourcelist" />\n')
@@ -49,9 +49,8 @@ class ResourceSyncPublisherClient(Client):
         # Same for changelist_sitemap
         if not os.path.exists(changelist_sitemap):
             p = urllib.parse.urlparse(changelist_sitemap)
-            finalPath = os.path.abspath(os.path.join(p.netloc, p.path))
-            logger.debug("Writing empty changelist as %s", finalPath)
-            with open(finalPath, mode='w', encoding='utf-8') as file:
+            logger.debug("creating empty changelist. path = %s", p.path)
+            with open(p.path, mode='w', encoding='utf-8') as file:
                 file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
                 file.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">\n')
                 file.write('<rs:md capability="changelist" />\n')

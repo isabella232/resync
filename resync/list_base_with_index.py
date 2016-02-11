@@ -320,7 +320,7 @@ class ListBaseWithIndex(ListBase):
                     raise ListBaseIndexError(
                         "Cannot map sitemap filename to URI (%s)" % str(e))
                 self.logger.info("Writing sitemap %s..." % (file))
-                f = open(file, 'w')
+                f = open(file, 'wb')
                 chunk.index = index_uri
                 chunk.md = index.md
                 s.resources_as_xml(chunk, fh=f)
@@ -333,14 +333,14 @@ class ListBaseWithIndex(ListBase):
                 # Get next chunk
                 (chunk, nextresource) = self.get_resources_chunk(resources_iter, nextresource)
             self.logger.info("Wrote %d sitemaps" % (len(index)))
-            f = open(basename, 'w')
+            f = open(basename, 'wb')
             self.logger.info("Writing sitemapindex %s..." % (basename))
             s.resources_as_xml(index, sitemapindex=True, fh=f)
             f.close()
             self.logger.info("Wrote sitemapindex %s" % (basename))
         else:
             self.logger.debug("Open file with encoding UTF-8")
-            f = open(basename, 'w', encoding="UTF-8")
+            f = open(basename, 'wb')
             self.logger.info("Writing sitemap %s..." % (basename))
             s.resources_as_xml(chunk, fh=f)
             f.close()

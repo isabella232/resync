@@ -108,10 +108,14 @@ class Sitemap(object):
         if (sys.version_info < (2, 7)):
             tree.write(fh, encoding='UTF-8')
         else:
-            self.logger.debug("resources_as_xml with encoding=unicode")
-            tree.write(fh, encoding='unicode',
+            self.logger.debug("resources_as_xml with encoding=UTF-8")
+            # the encoding=unicode gives cp1252 on Window systems
+            #
+            tree.write(fh, encoding='UTF-8',
                        xml_declaration=True, method='xml')
+
         if (xml_buf is not None):
+            self.logger.debug("No filehandle set so returning the buffer value.")
             return(xml_buf.getvalue())
 
     # #### Read/parse an XML sitemap or sitemapindex #####
