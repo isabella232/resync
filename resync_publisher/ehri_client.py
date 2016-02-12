@@ -7,11 +7,18 @@ Created on 24 sep. 2015
 @author: linda
 '''
 
-import logging, os.path, urllib.parse
+import logging, os.path, urllib.parse, platform
 from resync.client import Client
 from resync.change_list import ChangeList
 
 logger = logging.getLogger(__name__)
+
+def normalizePath(absolutepath):
+    opsys = platform.system()
+    if opsys == "Windows":
+        return absolutepath.strip("/")
+    else:
+        return absolutepath
 
 class ResourceSyncPublisherClient(Client):
     '''
@@ -36,10 +43,10 @@ class ResourceSyncPublisherClient(Client):
         # When we start with a fresh directory, there will be no resource_sitemap. Just create an empty xml file
         # to get things started
         if not os.path.exists(resource_sitemap):
-            p = urllib.parse.urlparse(resource_sitemap)
-            logger.debug("creating empty resourcelist. path = %s", p.path)
+            p = normalizePath(urllib.parse.urlparse(resource_sitemap).path)
+            logger.debug("creating empty resourcelist. path = %s", p)
             #finalPath = os.path.abspath(os.path.join(p.netloc, p.path))
-            with open(p.path, mode='w', encoding='utf-8') as file:
+            with open(p, mode='w', encoding='utf-8') as file:
                 file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
                 file.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">\n')
                 file.write('<rs:md capability="resourcelist" />\n')
@@ -48,9 +55,9 @@ class ResourceSyncPublisherClient(Client):
 
         # Same for changelist_sitemap
         if not os.path.exists(changelist_sitemap):
-            p = urllib.parse.urlparse(changelist_sitemap)
-            logger.debug("creating empty changelist. path = %s", p.path)
-            with open(p.path, mode='w', encoding='utf-8') as file:
+            p = normalizePath(urllib.parse.urlparse(changelist_sitemap).path)
+            logger.debug("creating empty changelist. path = %s", p)
+            with open(p, mode='w', encoding='utf-8') as file:
                 file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
                 file.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">\n')
                 file.write('<rs:md capability="changelist" />\n')
