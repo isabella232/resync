@@ -95,7 +95,7 @@ class TestExamplesFromSpec(unittest.TestCase):
                          'http://example.com/resourcedump.zip'].lastmod, '2013-01-03T09:00:00Z')
 
     def test_ex_05(self):
-        """resourcesync_ex_5 is a simple resource dump manifest with two files listed"""
+        """resourcesync_ex_5 is a simple resource dump manifest with two rs listed"""
         rdm = ResourceDumpManifest()
         rdm.parse(
             'file://' + os.path.abspath('resync/test/testdata/examples_from_spec/resourcesync_ex_5.xml'))
@@ -288,7 +288,7 @@ class TestExamplesFromSpec(unittest.TestCase):
 
         This is not something that would usually be created directly
         but instead would be created as part of the process of
-        writing a large Resource List in multiple files. However,
+        writing a large Resource List in multiple rs. However,
         it is possible to create manually.
         """
         rli = ResourceList()
@@ -529,7 +529,7 @@ class TestExamplesFromSpec(unittest.TestCase):
         fh.close()
 
     def test_build_ex_22(self):
-        """Change Dump with three dump files"""
+        """Change Dump with three dump rs"""
         cd = ChangeDump()
         cd.up = 'http://example.com/dataset1/capabilitylist.xml'
         cd.md_from = "2013-01-01T00:00:00Z"

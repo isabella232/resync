@@ -54,17 +54,17 @@ def main():
                    help="parse a remote sitemap/sitemapindex (from mapping or explicit --sitemap) and show summary information including document type and number of entries")
     rem.add_option('--explore', '-x', action='store_true',
                    help="read discovery information and show capabilities. Will use either an explicit --sitemap or the first mapping URI specified to determine which server to look for .well-known discovery information or which URI to try")
-    # b. modes based solely on files on local disk
+    # b. modes based solely on rs on local disk
     loc = p.add_option_group('LOCAL MODES',
-                             'These modes act on files on the local disk')
+                             'These modes act on rs on the local disk')
     loc.add_option('--resourcelist', '--resource-list', '-r', action='store_true',
-                   help="write a resource list based on files on disk using uri=path mappings "
+                   help="write a resource list based on rs on disk using uri=path mappings "
                         "in reverse to calculate URIs from the local paths. Scans local disk "
                         "based either on explicit --paths setting, else starting from all local "
                         "paths specified in the mappings. Writes to STDOUT by default, override "
                         "with --outfile")
     loc.add_option('--calculatechangelist', '--new-resource-list', action='store_true',
-                   help="write a resource list based on new/updated files on disk using uri=path mappings "
+                   help="write a resource list based on new/updated rs on disk using uri=path mappings "
                         "in reverse. Scans local disk and combines with --reference (the resourcelist) and "
                         "--newreference (the changelist) to create a new changelist "
                         "based either on explicit --paths setting, else starting from all local "
@@ -72,7 +72,7 @@ def main():
                         "with --outfile")
     loc.add_option('--changelist', '--change-list', '-c', action='store_true',
                    help="write a change list based on comparison of a reference sitemap "
-                        "(specify file with --reference) and either files on disk (using "
+                        "(specify file with --reference) and either rs on disk (using "
                         "the mapping provided) or a second sitemap (specify file with "
                         "--newreference). Otherwise follows --resourcelist options. Also accepts "
                         "the --empty option (with no mapping) to write and empty changelist.")
@@ -133,7 +133,7 @@ def main():
     opt.add_option('--checksum', action='store_true',
                    help="use checksum (md5) in addition to last modification time and size")
     opt.add_option('--delete', action='store_true',
-                   help="allow files on destination to be deleted")
+                   help="allow rs on destination to be deleted")
     opt.add_option('--from', type=str, action='store', dest='from_datetime', metavar="DATETIME",
                    help="explicit datetime value used to filter updates in change list for "
                         "--incremental sync")

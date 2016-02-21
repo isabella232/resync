@@ -15,7 +15,7 @@ from resync.resource_list import ResourceList
 class ResourceDumpManifest(ResourceList):
     """Class representing a Resource Dump Manifest
 
-    A ResourceDumpManifest comprises a set of files/resources
+    A ResourceDumpManifest comprises a set of rs/resources
     in a content package. Properties much Like a ResourceList
     and implemented as a sub-class of ResourceList.
     """

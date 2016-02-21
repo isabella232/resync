@@ -125,7 +125,7 @@ class ResourceList(ListBaseWithIndex):
 
     In normal use it is expected that any Resource List Index will be
     created automatically when writing out a large Resource List in
-    multiple sitemap files. However, should it be necessary to
+    multiple sitemap rs. However, should it be necessary to
     explicitly create an index then this may be specified with:
 
     rli = ResourceList( resources_class=ResourceDictOrdered )

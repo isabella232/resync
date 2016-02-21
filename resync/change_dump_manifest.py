@@ -17,7 +17,7 @@ from resync.change_list import ChangeList
 class ChangeDumpManifest(ChangeList):
     """Class representing a Change Dump Manifest
 
-    A ChangeDumpManifest comprises a set of files/resources
+    A ChangeDumpManifest comprises a set of rs/resources
     in a content package. Properties much Like a ChangeList
     and implemented as a sub-class of ChangeeList.
     """

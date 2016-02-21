@@ -88,14 +88,14 @@ class TestDump(unittest.TestCase):
         # tmpbase=os.path.join(tmpdir,'base')
         # d.max_size=2000 # start new zip after size exceeds 2000 bytes
         # n=d.write(tmpbase)
-        # self.assertEqual( n, 2, 'expect to write 2 dump files' )
+        # self.assertEqual( n, 2, 'expect to write 2 dump rs' )
         #
-        # Now repeat with large size limit but small number of files limit
+        # Now repeat with large size limit but small number of rs limit
         d2 = Dump(rl)
         tmpbase = os.path.join(self.tmpdir, 'test03_')
         d2.max_files = 4
         n = d2.write(tmpbase)
-        self.assertEqual(n, 3, 'expect to write 3 dump files')
+        self.assertEqual(n, 3, 'expect to write 3 dump rs')
         self.assertTrue(os.path.isfile(tmpbase + '00000.zip'))
         self.assertTrue(os.path.isfile(tmpbase + '00001.zip'))
         self.assertTrue(os.path.isfile(tmpbase + '00002.zip'))
@@ -110,7 +110,7 @@ class TestDump(unittest.TestCase):
         self.assertEqual(zo.getinfo('d').file_size, 13)
         zo.close()
         os.unlink(zipf)
-        # Check second and third files have expected contents
+        # Check second and third rs have expected contents
         zipf = tmpbase + '00001.zip'
         zo = zipfile.ZipFile(zipf, 'r')
         self.assertEqual(zo.namelist(), ['manifest.xml', 'e', 'f', 'g', 'h'])
@@ -133,7 +133,7 @@ class TestDump(unittest.TestCase):
         tmpbase = os.path.join(self.tmpdir, 'test0f_')
         d2.max_size = 2000
         n = d2.write(tmpbase)
-        self.assertEqual(n, 2, 'expect to write 2 dump files')
+        self.assertEqual(n, 2, 'expect to write 2 dump rs')
         self.assertTrue(os.path.isfile(tmpbase + '00000.zip'))
         self.assertTrue(os.path.isfile(tmpbase + '00001.zip'))
         # Look at the first file in detail
@@ -150,7 +150,7 @@ class TestDump(unittest.TestCase):
         self.assertEqual(zo.getinfo('f').file_size, 1625)
         zo.close()
         os.unlink(zipf)
-        # Check second and third files have expected contents
+        # Check second and third rs have expected contents
         zipf = tmpbase + '00001.zip'
         zo = zipfile.ZipFile(zipf, 'r')
         self.assertEqual(

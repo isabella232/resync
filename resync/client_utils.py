@@ -39,7 +39,6 @@ def init_logging(to_file=False, logfile=None,
     a file. This will be logfile if set, else default_logfile (which may
     also be overridden).
     """
-
     fmt = '%(asctime)s | %(name)s | %(levelname)s | %(message)s'
     formatter = UTCFormatter(fmt)
 

@@ -47,7 +47,7 @@ class ListBaseWithIndex(ListBase):
 
     mapper - Mapper instance used to map between file names and URIs so that
         the correct URIs can be written into a sitemapindex which correspond
-        to those that the component sitemap files will be exposed as
+        to those that the component sitemap rs will be exposed as
     """
 
     def __init__(self, resources=None, count=None, md=None, ln=None, uri=None,
@@ -66,7 +66,7 @@ class ListBaseWithIndex(ListBase):
             True if (allow_multifile is None) else allow_multifile)
         self.check_url_authority = False
         self.content_length = 0
-        self.num_files = 0            # Number of files read
+        self.num_files = 0            # Number of rs read
         self.bytes_read = 0           # Aggregate of content_length values
 
     # #### INPUT #####
@@ -90,7 +90,7 @@ class ListBaseWithIndex(ListBase):
             raise IOError(
                 "Failed to load sitemap/sitemapindex from %s (%s)"
                 "" % (uri, str(e)))
-        # Get the Content-Length if we can (works fine for local files)
+        # Get the Content-Length if we can (works fine for local rs)
         try:
             self.content_length = int(fh.info()['Content-Length'])
             self.bytes_read += self.content_length
@@ -164,7 +164,7 @@ class ListBaseWithIndex(ListBase):
             raise ListBaseIndexError(
                      "Failed to load sitemap from %s listed in sitemap index "
                      "%s (%s)" % (sitemap_uri, sitemapindex_uri, str(e)))
-        # Get the Content-Length if we can (works fine for local files)
+        # Get the Content-Length if we can (works fine for local rs)
         try:
             self.content_length = int(fh.info()['Content-Length'])
             self.bytes_read += self.content_length
@@ -272,18 +272,18 @@ class ListBaseWithIndex(ListBase):
         return(s.resources_as_xml(part))
 
     def write(self, basename='/tmp/sitemap.xml'):
-        """Write one or a set of sitemap files to disk
+        """Write one or a set of sitemap rs to disk
 
         resources is a ResourceContainer that may be an ResourceList or
         a ChangeList. This may be a generator so data is read as needed
         and length is determined at the end.
 
         basename is used as the name of the single sitemap file or the
-        sitemapindex for a set of sitemap files.
+        sitemapindex for a set of sitemap rs.
 
         Uses self.max_sitemap_entries to determine whether the resource_list
         can be written as one sitemap. If there are more entries and
-        self.allow_multifile is set true then a set of sitemap files,
+        self.allow_multifile is set true then a set of sitemap rs,
         with an sitemapindex, will be written.
         """
         # Access resources through iterator only
@@ -297,7 +297,7 @@ class ListBaseWithIndex(ListBase):
                     "Too many entries for a single sitemap but multifile"
                     " disabled")
             # Work out URI of sitemapindex so that we can link up to
-            # it from the individual sitemap files
+            # it from the individual sitemap rs
             try:
                 index_uri = self.mapper.dst_to_src(basename)
             except MapperError as e:

@@ -19,10 +19,10 @@ class Dump(object):
 
        rl = ResourceList()
        # ... add items by whatever means, may have >50k items and/or
-       # >100MB total size of files ...
+       # >100MB total size of rs ...
        d = Dump()
        d.write(resources=rl,basename="/tmp/rd_")
-       # will create dump files /tmp/rd_00001.zip etc.
+       # will create dump rs /tmp/rd_00001.zip etc.
     """
 
     def __init__(self, resources=None, fileformat=None, compress=True):
@@ -36,9 +36,9 @@ class Dump(object):
         self.logger = logging.getLogger('resync.dump')
 
     def write(self, basename=None, write_separate_manifests=True):
-        """Write one or more dump files to complete this dump
+        """Write one or more dump rs to complete this dump
 
-        Returns the number of dump/archive files written.
+        Returns the number of dump/archive rs written.
         """
         self.check_files()
         n = 0
@@ -55,7 +55,7 @@ class Dump(object):
                 raise DumpError(
                     "Unknown dump format requested (%s)" % (self.format))
             n += 1
-        self.logger.info("Wrote %d dump files" % (n))
+        self.logger.info("Wrote %d dump rs" % (n))
         return(n)
 
     def write_zip(self, resources=None, dumpfile=None):
@@ -63,7 +63,7 @@ class Dump(object):
 
         Writes a ZIP file containing the resources in the iterable resources
         along with a manifest file manifest.xml (written first). No checks
-        on the size of files or total size are performed, this is expected
+        on the size of rs or total size are performed, this is expected
         to have been done beforehand.
         """
         compression = (ZIP_DEFLATED if self.compress else ZIP_STORED)
@@ -77,7 +77,7 @@ class Dump(object):
             real_path[archive_path] = resource.path
             resource.path = archive_path
         zf.writestr('manifest.xml', rdm.as_xml())
-        # Add all files in the resources
+        # Add all rs in the resources
         for resource in resources:
             zf.write(real_path[resource.path], arcname=resource.path)
         zf.close()
@@ -98,7 +98,7 @@ class Dump(object):
         except:
             raise DumpError("Failed to load WARC library")
         wf = WARCFile(dumpfile, mode="w", compress=self.compress)
-        # Add all files in the resources
+        # Add all rs in the resources
         for resource in resources:
             wh = WARCHeader({})
             wh.url = resource.uri
@@ -116,17 +116,17 @@ class Dump(object):
             "" % (dumpfile, warcsize))
 
     def check_files(self, set_length=True, check_length=True):
-        """Go though and check all files in self.resources, add up size, and
+        """Go though and check all rs in self.resources, add up size, and
         find longest common path that can be used when writing the dump file.
         Saved in self.path_prefix.
 
         Parameters set_length and check_length control control whether then
         set_length attribute should be set from the file size if not specified,
         and whether any length specified should be checked. By default both
-        are True. In any event, the total size calculated is the size of files
+        are True. In any event, the total size calculated is the size of rs
         on disk.
         """
-        total_size = 0  # total size of all files in bytes
+        total_size = 0  # total size of all rs in bytes
         path_prefix = None
         for resource in self.resources:
             if (resource.path is None):
@@ -155,14 +155,14 @@ class Dump(object):
         self.path_prefix = path_prefix
         self.total_size = total_size
         self.logger.info(
-            "Total size of files to include in dump %d bytes" % (total_size))
+            "Total size of rs to include in dump %d bytes" % (total_size))
         return True
 
     def partition_dumps(self):
         """Yield a set of manifest object that parition the dumps
 
-        Simply adds resources/files to a manifest until their are either the
-        the correct number of files or the size limit is exceeded, then yields
+        Simply adds resources/rs to a manifest until their are either the
+        the correct number of rs or the size limit is exceeded, then yields
         that manifest.
         """
         manifest = self.manifest_class()

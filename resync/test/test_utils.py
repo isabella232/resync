@@ -14,7 +14,7 @@ class TestUtill(unittest.TestCase):
         self.assertEqual('j912liHgA/48DCHpkptJHg==', resync.utils.compute_md5_for_file(file))
 
     def test3_file(self):
-        # non-text files can also be hashed
+        # non-text rs can also be hashed
         file = os.path.join(curr_dir, "testdata/finder.png")
         self.assertEqual('KILnhtMbzHrN3yjI7cRxlg==', resync.utils.compute_md5_for_file(file))
 

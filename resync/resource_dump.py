@@ -31,9 +31,9 @@ class ResourceDump(ResourceList):
 
     def write(self, basename="/tmp/resource_dump.xml", dumpfile=None):
         """Write out a Resource Dump document and optionally also the actual
-        dump files
+        dump rs
 
-        Dump files will be written if the dumpfile argument is set to a base
+        Dump rs will be written if the dumpfile argument is set to a base
         filename.
         """
         super(ResourceDump, self).write(basename)

@@ -87,9 +87,9 @@ class Client(object):
         return(self.sitemap_uri(self.resource_list_name))
 
     def build_resource_list(self, paths=None, set_path=False):
-        """Return a resource list for files on local disk
+        """Return a resource list for rs on local disk
 
-        The set of files is taken by disk scan from the paths specified or
+        The set of rs is taken by disk scan from the paths specified or
         else defaults to the paths specified in the current mappings
 
         paths - override paths from mappings if specified
@@ -132,7 +132,7 @@ class Client(object):
         the last timestamp seen is recorded as client state.
         """
         action = ('audit' if (audit_only) else 'baseline sync')
-        self.logger.debug("Starting " + action)
+        self.logger.debug("Starting " + action + " len(mapper)=" + str(len(self.mapper)))
         # 0. Sanity checks
         if (len(self.mapper) < 1):
             raise ClientFatalError(
@@ -185,7 +185,7 @@ class Client(object):
                         "location it does not have authority over (%s), "
                         "override with --noauth"
                         "" % (self.sitemap, resource.uri))
-        # 5. Grab files to do sync
+        # 5. Grab rs to do sync
         delete_msg = (", and delete %d resources" %
                       len(deleted)) if (allow_deletion) else ''
         self.logger.info("Will GET %d resources%s" %
@@ -388,7 +388,12 @@ class Client(object):
         Returns the number of resources updated/created (0 or 1)
         """
         path = os.path.dirname(filename)
-        distutils.dir_util.mkpath(path)
+        #self.logger.debug("Creating path %s is.dir=%s" % (path, os.path.isdir(path)))
+        # why would one want to use distutils (Python Distribution Utilities) to create directories?
+        #distutils.dir_util.mkpath(path) # under some circumstances will not create the directories in path
+        os.makedirs(path, exist_ok=True)
+        #self.logger.debug("Created path %s is.dir=%s" % (path, os.path.isdir(path)))
+
         num_updated = 0
         if (self.dryrun):
             self.logger.info("dryrun: would GET %s --> %s" %
@@ -396,6 +401,7 @@ class Client(object):
         else:
             # 1. GET
             try:
+                self.logger.debug("updating %s --> %s" % (resource.uri, filename))
                 urllib.request.urlretrieve(resource.uri, filename)
                 num_updated += 1
             except IOError as e:
@@ -435,7 +441,7 @@ class Client(object):
         Regardless of whether the deletion occurs, self.last_timestamp will
         be updated if the resource.timestamp is later than the current value.
 
-        Returns the number of files actually deleted (0 or 1).
+        Returns the number of rs actually deleted (0 or 1).
         """
         num_deleted = 0
         uri = resource.uri
@@ -665,7 +671,7 @@ class Client(object):
 
     def write_resource_list(self, paths=None, outfile=None,
                             links=None, dump=None):
-        """Write a Resource List or a Resource Dump for files on local disk
+        """Write a Resource List or a Resource Dump for rs on local disk
 
         Set of resources included is based on paths setting or else the
         mappings. Optionally links can be added. Output will be to stdout
@@ -691,7 +697,7 @@ class Client(object):
                 except ListBaseIndexError as e:
                     raise ClientFatalError(
                         "%s. Use --output option to specify base name for "
-                        "output files." % str(e))
+                        "output rs." % str(e))
             else:
                 rl.write(basename=outfile)
 
@@ -702,7 +708,7 @@ class Client(object):
 
         Unless the both ref_sitemap and newref_sitemap are specified then the
         Change List is calculated between the reference an the current state
-        of files on disk. The files on disk are scanned based either on the
+        of rs on disk. The rs on disk are scanned based either on the
         paths setting or else on the mappings.
         """
         cl = ChangeList(ln=links)
@@ -710,7 +716,7 @@ class Client(object):
             # 1. Get and parse reference sitemap
             old_rl = self.read_reference_resource_list(ref_sitemap)
             # 2. Depending on whether a newref_sitemap was specified, either
-            # read that or build resource list from files on disk
+            # read that or build resource list from rs on disk
             if (newref_sitemap is None):
                 # Get resource list from disk
                 new_rl = self.build_resource_list(paths=paths, set_path=dump)

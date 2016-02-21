@@ -34,9 +34,9 @@ class ResourceSyncPublisherClient(Client):
     def calculate_changelist(self, paths=None, outfile=None,
                              resource_sitemap=None, changelist_sitemap=None,
                              links=None):
-        """ Build a ChangeList describing the updated/new files on local disk
+        """ Build a ChangeList describing the updated/new rs on local disk
         Based on the combined set of the referenced ResourceList, ChangeList
-        and the local files.
+        and the local rs.
         """
         # create fresh resourcelist, the combination of
 
@@ -77,7 +77,7 @@ class ResourceSyncPublisherClient(Client):
                 old_rl.add(r, True)
         combined_rl = old_rl
         # update resourcelist
-        # Build a new Resource List from the files on local disk
+        # Build a new Resource List from the rs on local disk
         new_rl = self.build_resource_list(paths=paths, set_path=None)
         (_, updated, _, created) = combined_rl.compare(new_rl)
         combined_rl.add(updated, True)
@@ -99,3 +99,5 @@ class ResourceSyncPublisherClient(Client):
         else:
             cl.write(basename=outfile)
         return(cl)
+
+

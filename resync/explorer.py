@@ -91,7 +91,7 @@ class Explorer(Client):
                         if (os.path.isfile(file)):
                             starts.append(XResource(file))
                     if (len(starts) == 0):
-                        raise ClientFatalError("No likely capability files "
+                        raise ClientFatalError("No likely capability rs "
                                                "found in local directory %s" %
                                                (path))
                 else:

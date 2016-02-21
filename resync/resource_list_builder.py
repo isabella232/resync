@@ -53,13 +53,13 @@ class ResourceListBuilder():
         self.compiled_exclude_files = []
 
     def add_exclude_files(self, exclude_patterns):
-        """Add more patterns of files to exclude while building
+        """Add more patterns of rs to exclude while building
         resource_list"""
         for pattern in exclude_patterns:
             self.exclude_files.append(pattern)
 
     def compile_excludes(self):
-        """Compile a set of regexps for files to be exlcuded from scans"""
+        """Compile a set of regexps for rs to be exlcuded from scans"""
         self.compiled_exclude_files = []
         for pattern in self.exclude_files:
             self.compiled_exclude_files.append(re.compile(pattern))
@@ -86,15 +86,15 @@ class ResourceListBuilder():
 
         Example usage with mapping start paths:
 
-        mapper=Mapper('http://example.org/path','/path/to/files')
+        mapper=Mapper('http://example.org/path','/path/to/rs')
         rlb = ResourceListBuilder(mapper=mapper)
         m = rlb.from_disk()
 
         Example usage with explicit paths:
 
-        mapper=Mapper('http://example.org/path','/path/to/files')
+        mapper=Mapper('http://example.org/path','/path/to/rs')
         rlb = ResourceListBuilder(mapper=mapper)
-        m = rlb.from_disk(paths=['/path/to/files/a','/path/to/files/b'])
+        m = rlb.from_disk(paths=['/path/to/rs/a','/path/to/rs/b'])
         """
         # Either use resource_list passed in or make a new one
         if (resource_list is None):
@@ -134,7 +134,7 @@ class ResourceListBuilder():
                     if (num_files % 50000 == 0):
                         self.logger.info(
                             "ResourceListBuilder.from_disk_add_path: "
-                            "%d files..." % (num_files))
+                            "%d rs..." % (num_files))
                     self.add_file(resource_list=resource_list,
                                   resource_dir=dirpath, file=file_in_dirpath)
                     # prune list of dirs based on self.exclude_dirs

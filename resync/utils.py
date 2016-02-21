@@ -59,7 +59,7 @@ def compute_md5_for_string(string):
             string.encode('utf-8')).digest()).decode('utf-8')
 
 
-# can only read utf-8 encoded files.
+# can only read utf-8 encoded rs.
 def old_compute_md5_for_file(filename, block_size=2**14):
     """Compute MD5 digest for a file
 
