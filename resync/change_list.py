@@ -58,3 +58,12 @@ class ChangeList(ListBaseWithIndex):
         for resource in resources:
             rc = Resource(resource=resource, change=change)
             self.add(rc)
+
+    def has_md5(self):
+        """Return true if at least one contained resource-like object has md5 data"""
+        if (self.resources is None):
+            return(False)
+        for resource in self:
+            if (resource.md5 is not None):
+                return(True)
+        return(False)

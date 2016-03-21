@@ -158,6 +158,9 @@ class Client(object):
             raise ClientFatalError(
                 "Aborting as there are no resources to sync")
         if (self.checksum and not src_resource_list.has_md5()):
+            # Whatever is done with the class-level property self.checksum may be unclear, one thing is for certain:
+            # after one run of this method it may be changed depending on some arbitrary external
+            # state.
             self.checksum = False
             self.logger.info(
                 "Not calculating checksums on destination as not "
@@ -202,7 +205,7 @@ class Client(object):
         for resource in updated:
             uri = resource.uri
             filename = self.mapper.src_to_dst(uri)
-            self.logger.warning("updated: %s -> %s" % (uri, filename))
+            self.logger.info("updated: %s -> %s" % (uri, filename))
             num_updated += self.update_resource(resource, filename, 'updated')
         for resource in deleted:
             uri = resource.uri
@@ -337,7 +340,7 @@ class Client(object):
         # 6. Apply changes at same time or after from_timestamp
         delete_msg = (", and delete %d resources" %
                       to_delete) if (allow_deletion) else ''
-        self.logger.warning("Will apply %d changes%s" %
+        self.logger.info("Will apply %d changes%s" %
                             (len(src_change_list), delete_msg))
         num_updated = 0
         num_deleted = 0
@@ -419,17 +422,18 @@ class Client(object):
                     self.last_timestamp = resource.timestamp
             self.log_event(Resource(resource=resource, change=change))
             # 3. sanity check
+
             length = os.stat(filename).st_size
             if (resource.length is None):
                 self.logger.warning("Caught flying None: " + str(resource))
             elif (resource.length != length):
-                self.logger.info("Downloaded size for %s of %d bytes does not "
+                self.logger.warn("Downloaded size for %s of %d bytes does not "
                                  "match expected %d bytes"
                                  % (resource.uri, length, resource.length))
             if (self.checksum and resource.md5 is not None):
                 file_md5 = compute_md5_for_file(filename)
                 if (resource.md5 != file_md5):
-                    self.logger.info("MD5 mismatch for %s, got %s but expected"
+                    self.logger.warn("MD5 mismatch for %s, got %s but expected"
                                      " %s bytes" % (resource.uri, file_md5,
                                                     resource.md5))
         return(num_updated)
@@ -487,7 +491,7 @@ class Client(object):
         capability = '(unknown capability)'
         if ('capability' in resource_container.md):
             capability = resource_container.md['capability']
-        print("Parsed %s document with %d entries" % (capability, num_entries))
+        self.logger.debug("Parsed %s document with %d entries" % (capability, num_entries))
         if (self.verbose):
             to_show = 100
             override_str = ' (override with --max-sitemap-entries)'
@@ -495,11 +499,11 @@ class Client(object):
                 to_show = self.max_sitemap_entries
                 override_str = ''
             if (num_entries > to_show):
-                print("Showing first %d entries sorted by ")
+                self.logger.debug("Showing first %d entries sorted by ")
                 "URI%s..." % (to_show, override_str)
             n = 0
             for resource in resource_container:
-                print('[%d] %s' % (n, str(resource)))
+                self.logger.debug('[%d] %s' % (n, str(resource)))
                 n += 1
                 if (n >= to_show):
                     break
@@ -510,16 +514,20 @@ class Client(object):
         Will use sitemap URI taken either from explicit self.sitemap_name
         or derived from the mappings supplied.
         """
+        # If you put the contents of a capabilitylist in a .well-known/resourcesync this thing prints the
+        # capabilities. However, the Source Description is not the Capability List, so this is not implemented
+        # as the protocol prescribes.
         uri = None
         if (self.sitemap_name is not None):
             uri = self.sitemap
-            print("Taking location from --sitemap option")
+            self.logger.debug("Taking location from --sitemap option")
             acceptable_capabilities = None  # ie. any
         elif (len(self.mapper) > 0):
             pu = urllib.parse.urlparse(self.mapper.default_src_uri())
+            self.logger.debug("pu=%s" % str(pu))
             uri = urllib.parse.urlunparse(
-                [pu[0], pu[1], '/.well-known/resourcesync', '', '', ''])
-            print("Will look for discovery information based on mappings")
+                [pu[0], pu[2], '/.well-known/resourcesync', '', '', ''])
+            self.logger.debug("Will look for discovery information based on mappings. uri=%s", uri)
             acceptable_capabilities = ['capabilitylist', 'capabilitylistindex']
         else:
             raise ClientFatalError(
@@ -538,7 +546,7 @@ class Client(object):
             history.append(uri)
             (uri, checks, acceptable_capabilities, inp) = self.explore_uri(
                 uri, checks, acceptable_capabilities, len(history) > 1)
-        print("--explore done, bye...")
+        self.logger.debug("--explore done, bye...")
 
     def explore_uri(self, uri, checks, caps, show_back=True):
         """Interactive exploration of document at uri
@@ -546,7 +554,7 @@ class Client(object):
         Will flag warnings if the document is not of type listed in caps
         """
         s = Sitemap()
-        print("Reading %s" % (uri))
+        self.logger.debug("Reading %s" % (uri))
         options = {}
         capability = None
         try:
@@ -557,10 +565,10 @@ class Client(object):
                 (options, capability) = self.explore_show_summary(
                     resource_container, s.parsed_index, caps)
         except IOError as e:
-            print("Cannot read %s (%s)\nGoing back" % (uri, str(e)))
+            self.logger.debug("Cannot read %s (%s)\nGoing back" % (uri, str(e)))
             return('', '', '', 'b')
         except Exception as e:
-            print("Cannot parse %s (%s)\nGoing back" % (uri, str(e)))
+            self.logger.debug("Cannot parse %s (%s)\nGoing back" % (uri, str(e)))
             return('', '', '', 'b')
         while (True):
             # don't offer number option for no resources/capabilities
@@ -590,22 +598,23 @@ class Client(object):
         return(options[inp].uri, checks, caps, inp)
 
     # second parameter: file
-    def explore_show_summary(self, _, parsed_index, caps):
+    def explore_show_summary(self, list, parsed_index, caps):
         """Show summary of one capability document
 
         Used as part of --explore.
         FIXME - should look for <rs:ln rel="up"...> link and show that
         """
+        # list comes out of the blue. This will not work
         num_entries = len(list.resources)
         capability = '(unknown capability)'
         if ('capability' in list.md):
             capability = list.md['capability']
         if (parsed_index):
             capability += 'index'
-        print("Parsed %s document with %d entries:"
+        self.logger.debug("Parsed %s document with %d entries:"
               "" % (capability, num_entries))
         if (caps is not None and capability not in caps):
-            print("WARNING - expected a %s document" % (','.join(caps)))
+            self.logger.debug("WARNING - expected a %s document" % (','.join(caps)))
         to_show = num_entries
         if (num_entries > 21):
             to_show = 20
@@ -623,22 +632,22 @@ class Client(object):
         n = 0
         if ('up' in list.ln):
             options['up'] = list.ln['up']
-            print("[%s] %s" % ('up', list.ln['up'].uri))
+            self.logger.debug("[%s] %s" % ('up', list.ln['up'].uri))
         for r in list.resources:
             if (n >= to_show):
-                print("(not showing remaining %d entries)" % (num_entries - n))
+                self.logger.debug("(not showing remaining %d entries)" % (num_entries - n))
                 break
             n += 1
             options[str(n)] = r
-            print("[%d] %s" % (n, r.uri))
+            self.logger.debug("[%d] %s" % (n, r.uri))
             if (r.capability is not None):
                 warning = ''
                 if (r.capability not in entry_caps):
                     warning = " (EXPECTED %s)" % (' or '.join(entry_caps))
-                print("  %s%s" % (r.capability, warning))
+                self.logger.debug("  %s%s" % (r.capability, warning))
             elif (len(entry_caps) == 1):
                 r.capability = entry_caps[0]
-                print("  capability not specified, should be %s")
+                self.logger.debug("  capability not specified, should be %s")
                 "" % (r.capability)
         return(options, capability)
 
@@ -648,9 +657,9 @@ class Client(object):
         Will also check headers against any values specified in
         check_headers.
         """
-        print("HEAD %s" % (uri))
+        self.logger.debug("HEAD %s" % (uri))
         response = requests.head(uri)
-        print("  status: %s" % (response.status_code))
+        self.logger.debug("  status: %s" % (response.status_code))
         # generate normalized lastmod
 #        if ('last-modified' in response.headers):
 #            response.headers.add['lastmod'] =
@@ -666,7 +675,7 @@ class Client(object):
                         check_str = ' MATCHES EXPECTED VALUE'
                     else:
                         check_str = ' EXPECTED %s' % (check_headers[header])
-                print("  %s: %s%s")
+                self.logger.debug("  %s: %s%s")
                 "" % (header, response.headers[header], check_str)
 
     def write_resource_list(self, paths=None, outfile=None,
@@ -793,7 +802,7 @@ class Client(object):
                 to_show = self.max_sitemap_entries
                 override_str = ''
             if (num_entries > to_show):
-                print("Showing first %d entries sorted by URI%s...")
+                self.logger.debug("Showing first %d entries sorted by URI%s...")
                 "" % (to_show, override_str)
             n = 0
             for r in rl.resources:

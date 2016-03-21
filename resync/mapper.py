@@ -147,6 +147,7 @@ class Map:
     def __init__(self, src_uri=None, dst_path=None):
         self.src_uri = self.strip_trailing_slashes(src_uri)
         self.dst_path = self.strip_trailing_slashes(dst_path)
+        self.logger = logging.getLogger(__name__)
 
     def strip_trailing_slashes(self, path):
         """Return input path minus any trailing slashes"""
@@ -163,11 +164,11 @@ class Map:
         success, None on failure.
         """
         m = re.match(self.dst_path + "/(.*)$", dst_file)
-        print(self.dst_path + "/(.*)$ - " + dst_file)
+        self.logger.debug(self.dst_path + "/(.*)$ - " + dst_file)
         if (m is None):
             return(None)
         rel_path = m.group(1)
-        print('src_uri:'+self.src_uri)
+        self.logger.debug('src_uri:'+self.src_uri)
         return(self.src_uri + '/' + rel_path)
 
     def src_to_dst(self, src_uri):
