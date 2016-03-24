@@ -213,7 +213,8 @@ class ResourceContainer(object):
         for r in self.resources:
             if (r.timestamp is None):
                 raise Exception("Entry %s has no timestamp" % (r.uri))
-            elif (r.timestamp >= timestamp):
+            # changed comparison from '>=' to '>'.
+            elif (r.timestamp > timestamp):
                 pruned.append(r)
             else:
                 n += 1
