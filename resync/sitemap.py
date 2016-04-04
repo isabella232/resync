@@ -102,17 +102,26 @@ class Sitemap(object):
         # have tree, now serialize
         tree = ElementTree(root)
         xml_buf = None
+        fh_is_file = True
         if (fh is None):
             xml_buf = io.StringIO()
             fh = xml_buf
+            fh_is_file = False
         if (sys.version_info < (2, 7)):
             tree.write(fh, encoding='UTF-8')
         else:
             self.logger.debug("resources_as_xml with encoding=UTF-8")
-            # the encoding=unicode gives cp1252 on Window systems
-            #
-            tree.write(fh, encoding='UTF-8',
-                       xml_declaration=True, method='xml')
+            # From https://docs.python.org/3.4/library/xml.etree.elementtree.html#write
+            # The output is either a string (str) or binary (bytes). This is controlled by the encoding argument.
+            # If encoding is "unicode", the output is a string; otherwise, it’s binary.
+            # Note that this may conflict with the type of file if it’s an open file object;
+            # make sure you do not try to write a string to a binary stream and vice versa.
+            if (fh_is_file):
+                tree.write(fh, encoding='UTF-8',
+                           xml_declaration=True, method='xml')
+            else:
+                tree.write(fh, encoding="unicode",
+                           xml_declaration=True, method='xml')
 
         if (xml_buf is not None):
             self.logger.debug("No filehandle set so returning the buffer value.")
@@ -320,7 +329,7 @@ class Sitemap(object):
             # have on element, look at attributes
             md = self.md_from_etree(md_elements[0], context=loc)
             # simple attributes that map directly to Resource object attributes
-            for att in ('capability', 'change', 'length', 'path', 'mime_type'):
+            for att in ('capability', 'change', 'length', 'path', 'mime_type', 'md_at', 'md_completed'):
                 if (att in md):
                     setattr(resource, att, md[att])
             # The ResourceSync beta spec lists md5, sha-1 and sha-256 fixity
