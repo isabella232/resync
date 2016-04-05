@@ -1,7 +1,7 @@
 """Dump handler for ResourceSync"""
 
 import logging
-import os.path
+import os.path, resync.w3c_datetime as w3c
 from zipfile import ZipFile, ZIP_STORED, ZIP_DEFLATED
 from resync.resource_dump_manifest import ResourceDumpManifest
 
@@ -166,20 +166,32 @@ class Dump(object):
         that manifest.
         """
         manifest = self.manifest_class()
+        manifest.pretty_xml = True
+        # From http://www.openarchives.org/rs/1.0/resourcesync#ResourceDumpManifest
+        # The mandatory <rs:md> child element of <urlset> must have a capability attribute with a value of
+        # resourcedump-manifest. It must also have an at attribute that conveys the datetime at which the process
+        # of taking a snapshot of resources for their inclusion in the ZIP package started, and it may have a
+        # completed attribute that conveys the datetime at which that process completed.
+        manifest.md_at = w3c.datetime_to_str(no_fractions=True)
         manifest_size = 0
         manifest_files = 0
+
         for resource in self.resources:
             manifest.add(resource)
             manifest_size += resource.length
             manifest_files += 1
             if (manifest_size >= self.max_size or
                     manifest_files >= self.max_files):
+                manifest.md_completed = w3c.datetime_to_str(no_fractions=True)
                 yield(manifest)
                 # Need to start a new manifest
                 manifest = self.manifest_class()
+                manifest.pretty_xml = True
+                manifest.md_at = w3c.datetime_to_str(no_fractions=True)
                 manifest_size = 0
                 manifest_files = 0
         if (manifest_files > 0):
+            manifest.md_completed = w3c.datetime_to_str(no_fractions=True)
             yield(manifest)
 
     def archive_path(self, real_path):
