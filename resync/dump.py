@@ -168,6 +168,7 @@ class Dump(object):
         manifest = self.manifest_class()
         manifest.pretty_xml = True
         # From http://www.openarchives.org/rs/1.0/resourcesync#ResourceDumpManifest
+        #
         # The mandatory <rs:md> child element of <urlset> must have a capability attribute with a value of
         # resourcedump-manifest. It must also have an at attribute that conveys the datetime at which the process
         # of taking a snapshot of resources for their inclusion in the ZIP package started, and it may have a
