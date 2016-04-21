@@ -71,11 +71,18 @@ class Dump(object):
                      compression=compression, allowZip64=True)
         # Write resources first
         rdm = ResourceDumpManifest(resources=resources)
+        rdm.pretty_xml = True
+        # The mandatory <rs:md> child element of <urlset> must have a capability attribute with a value of
+        # resourcedump-manifest. It must also have an at attribute that conveys the datetime at which the process
+        # of taking a snapshot of resources for their inclusion in the ZIP package started, and it may have a
+        # completed attribute that conveys the datetime at which that process completed.
+        rdm.md_at = w3c.datetime_to_str(no_fractions=True)
         real_path = {}
         for resource in resources:
             archive_path = self.archive_path(resource.path)
             real_path[archive_path] = resource.path
             resource.path = archive_path
+        rdm.md_completed = w3c.datetime_to_str(no_fractions=True)
         zf.writestr('manifest.xml', rdm.as_xml())
         # Add all rs in the resources
         for resource in resources:
