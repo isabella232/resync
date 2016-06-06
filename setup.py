@@ -19,7 +19,7 @@ setup(
     name='resync',
     version=version,
     packages=['resync'],
-    scripts=['bin/resync', 'bin/resync-explorer'],
+    #scripts=['bin/resync', 'bin/resync-explorer'],
     classifiers=["Development Status :: 3 - Alpha",
                  "Intended Audience :: Developers",
                  "License :: OSI Approved :: Apache Software License",
@@ -32,7 +32,7 @@ setup(
     author='Simeon Warner',
     author_email='simeon.warner@cornell.edu',
     description='ResourceSync library and client',
-    long_description=open('README').read(),
+    #long_description=open('README').read(),
     url='http://github.com/resync/resync',
     install_requires=[
         "requests",

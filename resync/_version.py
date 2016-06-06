@@ -3,4 +3,6 @@
 # Format: x.y.z where
 # x.y is spec version, see http://www.openarchives.org/rs/x.y/
 # z is incremented for revisions within that version, 1...
+#
+# This version [ehribranch] ported to python 3.
 __version__ = '1.0.1'
