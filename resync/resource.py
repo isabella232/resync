@@ -81,6 +81,7 @@ class Resource(object):
                  ts_completed=None, md_completed=None,
                  ts_from=None, md_from=None,
                  ts_until=None, md_until=None,
+                 ts_datetime=None, md_datetime=None,
                  resource=None, ln=None):
         """Initialize object either from parameters specified or
         from an existing Resource object. If explicit parameters
@@ -104,7 +105,7 @@ class Resource(object):
             for att in ['uri', 'timestamp', 'length', 'md5', 'sha1', 'sha256',
                         'change', 'path', 'capability',
                         'ts_at', 'md_at', 'ts_completed', 'md_completed',
-                        'ts_from', 'md_from', 'ts_until', 'md_until', 'ln']:
+                        'ts_from', 'md_from', 'ts_until', 'md_until', 'ts_datetime', 'md_datetime', 'ln']:
                 if hasattr(resource, att):
                     setattr(self, att, getattr(resource, att))
         # Any arguments will then override
@@ -134,6 +135,8 @@ class Resource(object):
             self.ts_from = ts_from
         if (ts_until is not None):
             self.ts_until = ts_until
+        if (ts_datetime is not None):
+            self.ts_datetime = ts_datetime
         if (capability is not None):
             self.capability = capability
         if (ln is not None):
@@ -149,6 +152,8 @@ class Resource(object):
             self.md_from = md_from
         if (md_until is not None):
             self.md_until = md_until
+        if (md_datetime is not None):
+            self.md_datetime = md_datetime
         # Sanity check
         if (self.uri is None):
             raise ValueError("Cannot create resource without a URI")
@@ -231,6 +236,17 @@ class Resource(object):
         """Set md_until value from a W3C Datetime value"""
         self._set_extra('ts_until', str_to_datetime(
             md_until, context='md_until datetime'))
+
+    @property
+    def md_datetime(self):
+        """md_datetime value in W3C Datetime syntax, Z notation"""
+        return datetime_to_str(self._get_extra('ts_datetime'))
+
+    @md_datetime.setter
+    def md_datetime(self, md_datetime):
+        """Set md_datetime value from a W3C Datetime value"""
+        self._set_extra('ts_datetime', str_to_datetime(
+            md_datetime, context='md_datetime datetime'))
 
     @property
     def capability(self):

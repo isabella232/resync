@@ -17,7 +17,8 @@ XML_ATT_NAME = {
     'md_at': 'at',
     'md_completed': 'completed',
     'md_from': 'from',
-    'md_until': 'until'
+    'md_until': 'until',
+    'md_datetime': 'datetime'
 }
 
 
@@ -252,7 +253,7 @@ class Sitemap(object):
         md_atts = {}
         for att in ('capability', 'change', 'hash', 'length', 'path',
                     'mime_type', 'md_at', 'md_completed', 'md_from',
-                    'md_until'):
+                    'md_until', 'md_datetime'):
             val = getattr(resource, att, None)
             if (val is not None):
                 md_atts[self._xml_att_name(att)] = str(val)
@@ -329,7 +330,7 @@ class Sitemap(object):
             # have on element, look at attributes
             md = self.md_from_etree(md_elements[0], context=loc)
             # simple attributes that map directly to Resource object attributes
-            for att in ('capability', 'change', 'length', 'path', 'mime_type', 'md_at', 'md_completed'):
+            for att in ('capability', 'change', 'length', 'path', 'mime_type', 'md_at', 'md_completed', 'md_datetime'):
                 if (att in md):
                     setattr(resource, att, md[att])
             # The ResourceSync beta spec lists md5, sha-1 and sha-256 fixity
@@ -358,7 +359,7 @@ class Sitemap(object):
         # grab all understood attributes into md dict
         for att in ('capability', 'change', 'hash', 'length', 'path',
                     'mime_type', 'md_at', 'md_completed', 'md_from',
-                    'md_until'):
+                    'md_until', 'md_datetime'):
             xml_att = self._xml_att_name(att)
             val = md_element.attrib.get(xml_att, None)
             if (val is not None):
