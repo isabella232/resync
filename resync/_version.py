@@ -5,4 +5,4 @@
 # z is incremented for revisions within that version, 1...
 #
 # This version [ehribranch] ported to python 3.
-__version__ = '1.0.1'
+__version__ = '1.0.2'
